@@ -1,0 +1,615 @@
+[
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminGradeController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/grades",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminGradeController",
+    "Method": "Create",
+    "RelativePath": "api/admin/grades",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Grade.CreateUpdateGradeDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminGradeController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/grades/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminGradeController",
+    "Method": "Update",
+    "RelativePath": "api/admin/grades/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Grade.CreateUpdateGradeDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminGradeController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/grades/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminQuizController",
+    "Method": "GetByUnit",
+    "RelativePath": "api/admin/quizzes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unitId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminQuizController",
+    "Method": "Create",
+    "RelativePath": "api/admin/quizzes",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Quiz.CreateUpdateQuizDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminQuizController",
+    "Method": "Update",
+    "RelativePath": "api/admin/quizzes/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Quiz.CreateUpdateQuizDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminQuizController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/quizzes/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUnitController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/units",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUnitController",
+    "Method": "Create",
+    "RelativePath": "api/admin/units",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Unit.CreateUpdateUnitDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUnitController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/units/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUnitController",
+    "Method": "Update",
+    "RelativePath": "api/admin/units/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Unit.CreateUpdateUnitDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUnitController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/units/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUserController",
+    "Method": "GetAll",
+    "RelativePath": "api/admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUserController",
+    "Method": "GetById",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUserController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUserController",
+    "Method": "ResetPassword",
+    "RelativePath": "api/admin/users/{id}/reset-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminUserController",
+    "Method": "ChangeRole",
+    "RelativePath": "api/admin/users/{id}/role",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.User.ChangeRoleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminVocabController",
+    "Method": "GetByUnit",
+    "RelativePath": "api/admin/vocabularies",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unitId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminVocabController",
+    "Method": "Create",
+    "RelativePath": "api/admin/vocabularies",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Vocabulary.CreateUpdateVocabDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminVocabController",
+    "Method": "Update",
+    "RelativePath": "api/admin/vocabularies/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Vocabulary.CreateUpdateVocabDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.Admin.AdminVocabController",
+    "Method": "Delete",
+    "RelativePath": "api/admin/vocabularies/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Auth.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.AuthController",
+    "Method": "Register",
+    "RelativePath": "api/auth/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Auth.RegisterRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.GradeController",
+    "Method": "GetAll",
+    "RelativePath": "api/grades",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.GradeController",
+    "Method": "GetById",
+    "RelativePath": "api/grades/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.GradeController",
+    "Method": "GetUnitsByGrade",
+    "RelativePath": "api/grades/{id}/units",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.ProgressController",
+    "Method": "Save",
+    "RelativePath": "api/progress",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.Progress.SaveProgressDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.ProgressController",
+    "Method": "GetMyProgress",
+    "RelativePath": "api/progress/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.ProgressController",
+    "Method": "GetMyBest",
+    "RelativePath": "api/progress/me/best",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unitId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.QuizController",
+    "Method": "GetByUnit",
+    "RelativePath": "api/quizzes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unitId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.QuizController",
+    "Method": "Review",
+    "RelativePath": "api/quizzes/review/{progressId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "progressId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.QuizController",
+    "Method": "Submit",
+    "RelativePath": "api/quizzes/submit",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "KidsLearn.DTOs.Quiz.SubmitQuizRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.UnitController",
+    "Method": "GetById",
+    "RelativePath": "api/units/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.UserController",
+    "Method": "UpdateMyProfile",
+    "RelativePath": "api/users/me",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.User.UpdateProfileDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.UserController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/users/me/password",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "KidsLearn.DTOs.User.ChangePasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.UserController",
+    "Method": "GetMyProfile",
+    "RelativePath": "api/users/me/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "KidsLearn.Controllers.VocabularyController",
+    "Method": "GetByUnit",
+    "RelativePath": "api/vocabularies",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "unitId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
