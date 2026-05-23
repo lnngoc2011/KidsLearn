@@ -1,28 +1,45 @@
-﻿namespace KidsLearn.DTOs.Quiz;
+﻿using KidsLearn.DTOs.Game;
 
-// ✨ MỞ RỘNG: Kết quả sau khi chấm bài, kèm thông tin Gamification
+namespace KidsLearn.DTOs.Quiz;
+
+// Kết quả sau khi nộp bài, kèm thông tin Game
 public class QuizResultDto
 {
-    public int ProgressId { get; set; }              // ID lượt làm bài để frontend gọi review
-    public int TotalQuestions { get; set; }          // Tổng số câu hỏi
-    public int CorrectAnswers { get; set; }          // Số câu đúng
-    public int WrongAnswers { get; set; }            // Số câu sai
-    public decimal Score { get; set; }               // Điểm 0-100
+	public int ProgressId { get; set; }
+	public int TotalQuestions { get; set; }
+	public int CorrectAnswers { get; set; }
+	public int WrongAnswers { get; set; }
+	public decimal Score { get; set; }
 
-    // ✨ MỚI: Gamification
-    public int StarCount { get; set; }               // 0-3 sao
-    public string MotivationalMessage { get; set; } = string.Empty; // Lời khen
+	// Game cơ bản
+	public int StarCount { get; set; }
+	public string MotivationalMessage { get; set; } = string.Empty;
 
-    // Chi tiết từng câu để học sinh xem lại (Review Mode)
-    public List<QuizAnswerDetailDto> Details { get; set; } = new();
+	// ✨ MỚI: Thông tin Game mở rộng
+	public int XPGained { get; set; }                // XP nhận được lần này
+	public int TotalXP { get; set; }                 // Tổng XP hiện tại
+	public int Level { get; set; }                   // Level sau khi tính lại
+	public bool LeveledUp { get; set; }              // Có lên cấp không
+	public string LevelName { get; set; } = string.Empty;
+
+	// Streak
+	public int CurrentStreak { get; set; }
+	public bool IsStreakMilestone { get; set; }
+	public string? StreakMessage { get; set; }
+
+	// Huy hiệu MỚI đạt được trong lần này
+	public List<BadgeDto> NewBadges { get; set; } = new();
+
+	// Chi tiết từng câu để xem lại
+	public List<QuizAnswerDetailDto> Details { get; set; } = new();
 }
 
 // Chi tiết 1 câu hỏi trong kết quả
 public class QuizAnswerDetailDto
 {
-    public int QuizId { get; set; }
-    public string QuestionText { get; set; } = string.Empty;
-    public int? SelectedAnswerId { get; set; }  // Có thể null nếu học sinh không chọn
-    public int CorrectAnswerId { get; set; }
-    public bool IsCorrect { get; set; }
+	public int QuizId { get; set; }
+	public string QuestionText { get; set; } = string.Empty;
+	public int? SelectedAnswerId { get; set; }
+	public int CorrectAnswerId { get; set; }
+	public bool IsCorrect { get; set; }
 }

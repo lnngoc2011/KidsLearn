@@ -9,7 +9,7 @@ public class UserDto
     public string? Role { get; set; }
     public DateTime? CreatedAt { get; set; }
 
-    // ✨ MỚI: Thông tin Gamification
+    // ✨ MỚI: Thông tin Game
     public int TotalXP { get; set; }
     public int Level { get; set; }
 }

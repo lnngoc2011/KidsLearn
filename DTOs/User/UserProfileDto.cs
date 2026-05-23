@@ -10,7 +10,7 @@ public class UserProfileDto
     public string? FullName { get; set; }
     public string? AvatarUrl { get; set; }
 
-    // Gamification
+    // Game
     public int TotalXP { get; set; }
     public int Level { get; set; }
     public string LevelName { get; set; } = string.Empty;  // Beginner/Explorer/Smart Kid/Vocab Master

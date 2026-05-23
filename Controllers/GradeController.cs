@@ -1,4 +1,5 @@
 ﻿using KidsLearn.Common;
+using KidsLearn.DTOs.Grade;
 using KidsLearn.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ namespace KidsLearn.Controllers;
 
 [ApiController]
 [Route("api/grades")]
-[Authorize]   // Yêu cầu đăng nhập
+[Authorize]
 public class GradeController : ControllerBase
 {
     private readonly IGradeService _gradeService;
@@ -19,10 +20,6 @@ public class GradeController : ControllerBase
         _unitService = unitService;
     }
 
-    /// <summary>
-    /// Lấy danh sách 5 khối lớp (Lớp 1-5)
-    /// GET /api/grades
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -30,10 +27,6 @@ public class GradeController : ControllerBase
         return Ok(ApiResponse<object>.Ok(grades));
     }
 
-    /// <summary>
-    /// Lấy 1 Grade theo ID
-    /// GET /api/grades/{id}
-    /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -43,15 +36,39 @@ public class GradeController : ControllerBase
         return Ok(ApiResponse<object>.Ok(grade));
     }
 
-    /// <summary>
-    /// Lấy danh sách Unit của Grade
-    /// GET /api/grades/{id}/units
-    /// ✨ MỚI: API quan trọng cho học sinh
-    /// </summary>
     [HttpGet("{id}/units")]
     public async Task<IActionResult> GetUnitsByGrade(int id)
     {
         var units = await _unitService.GetUnitByGradeAsync(id);
         return Ok(ApiResponse<object>.Ok(units));
+    }
+
+    // ===== ADMIN =====
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Create([FromBody] CreateUpdateGradeDto dto)
+    {
+        var created = await _gradeService.CreateAsync(dto);
+        return Ok(ApiResponse<object>.Ok(created, "Đã tạo khối lớp"));
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateGradeDto dto)
+    {
+        var updated = await _gradeService.UpdateAsync(id, dto);
+        if (updated == null)
+            return NotFound(ApiResponse<string>.Fail("Không tìm thấy khối lớp"));
+        return Ok(ApiResponse<object>.Ok(updated, "Đã cập nhật"));
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _gradeService.DeleteAsync(id);
+        if (!ok) return NotFound(ApiResponse<string>.Fail("Không tìm thấy khối lớp"));
+        return Ok(ApiResponse<string>.Ok("OK", "Đã xóa"));
     }
 }

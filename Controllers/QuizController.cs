@@ -19,10 +19,6 @@ public class QuizController : ControllerBase
         _quizService = quizService;
     }
 
-    /// <summary>
-    /// Lấy quiz theo Unit (không bao gồm IsCorrect)
-    /// GET /api/quizzes?unitId=5
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetByUnit([FromQuery] int unitId)
     {
@@ -30,10 +26,6 @@ public class QuizController : ControllerBase
         return Ok(ApiResponse<object>.Ok(quizzes));
     }
 
-    /// <summary>
-    /// Học sinh nộp bài quiz
-    /// POST /api/quizzes/submit
-    /// </summary>
     [HttpPost("submit")]
     public async Task<IActionResult> Submit([FromBody] SubmitQuizRequestDto request)
     {
@@ -52,10 +44,6 @@ public class QuizController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// ✨ MỚI: Xem lại bài đã làm (Review Mode)
-    /// GET /api/quizzes/review/{progressId}
-    /// </summary>
     [HttpGet("review/{progressId}")]
     public async Task<IActionResult> Review(int progressId)
     {
@@ -70,7 +58,51 @@ public class QuizController : ControllerBase
         return Ok(ApiResponse<object>.Ok(result));
     }
 
-    // Helper: Lấy UserId từ JWT Claims
+    // ===== ADMIN =====
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Create([FromBody] CreateUpdateQuizDto dto)
+    {
+        // Validation cơ bản: phải có đúng 1 đáp án đúng
+        var correctCount = dto.Answers?.Count(a => a.IsCorrect) ?? 0;
+        if (correctCount != 1)
+            return BadRequest(ApiResponse<string>.Fail("Câu hỏi phải có đúng 1 đáp án đúng"));
+
+        try
+        {
+            var created = await _quizService.CreateQuizAsync(dto);
+            return Ok(ApiResponse<object>.Ok(created, "Đã tạo câu hỏi"));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ApiResponse<string>.Fail(ex.Message));
+        }
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateQuizDto dto)
+    {
+        var correctCount = dto.Answers?.Count(a => a.IsCorrect) ?? 0;
+        if (correctCount != 1)
+            return BadRequest(ApiResponse<string>.Fail("Câu hỏi phải có đúng 1 đáp án đúng"));
+
+        var updated = await _quizService.UpdateQuizAsync(id, dto);
+        if (updated == null)
+            return NotFound(ApiResponse<string>.Fail("Không tìm thấy câu hỏi"));
+        return Ok(ApiResponse<object>.Ok(updated, "Đã cập nhật"));
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var ok = await _quizService.DeleteQuizAsync(id);
+        if (!ok) return NotFound(ApiResponse<string>.Fail("Không tìm thấy câu hỏi"));
+        return Ok(ApiResponse<string>.Ok("OK", "Đã xóa câu hỏi"));
+    }
+
     private int GetUserId()
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);

@@ -182,6 +182,6 @@ public class UnitService : IUnitService
 
     public Task<List<UnitDto>> GetUnitByGradeAsync(int gradeId)
     {
-        throw new NotImplementedException();
+        return GetAllUnitAsync(gradeId);
     }
 }
