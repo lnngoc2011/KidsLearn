@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using CloudinaryDotNet;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,6 +117,26 @@ builder.Services.AddAuthorization(options =>
 });
 
 // =========================================================
+// CLOUDINARY
+// =========================================================
+// Bind Cloudinary settings
+var cloudinarySettings = builder.Configuration
+    .GetSection("Cloudinary")
+    .Get<CloudinarySettings>();
+
+// Register Cloudinary as a singleton
+var account = new Account(
+    cloudinarySettings.CloudName,
+    cloudinarySettings.ApiKey,
+    cloudinarySettings.ApiSecret
+);
+
+var cloudinary = new Cloudinary(account);
+cloudinary.Api.Secure = true;
+
+builder.Services.AddSingleton(cloudinary);
+
+// =========================================================
 // DEPENDENCY INJECTION
 // =========================================================
 
@@ -149,6 +171,10 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IGameService,
     GameService>();
+builder.Services.AddScoped<
+    ICloudinaryService,
+    CloudinaryService>();
+
 
 // =========================================================
 // CONTROLLERS
