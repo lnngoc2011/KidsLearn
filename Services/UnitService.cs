@@ -11,10 +11,12 @@ namespace KidsLearn.Services;
 public class UnitService : IUnitService
 {
     private readonly KidsLearnDbContext _context;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public UnitService(KidsLearnDbContext context)
+    public UnitService(KidsLearnDbContext context, ICloudinaryService cloudinaryService)
     {
         _context = context;
+        _cloudinaryService = cloudinaryService;
     }
 
     /// <summary>
@@ -109,13 +111,13 @@ public class UnitService : IUnitService
         var gradeExists = await _context.Grades.AnyAsync(g => g.GradeId == dto.GradeId);
         if (!gradeExists)
             throw new KeyNotFoundException($"Không tìm thấy Grade với ID = {dto.GradeId}");
-
+        var newAvatarUrl = await _cloudinaryService.UploadImageAsync(dto.AvatarFile);
         var unit = new Unit
         {
             GradeId = dto.GradeId,
             Title = dto.Title,
             Description = dto.Description,
-            ImageUrl = dto.ImageUrl,
+            ImageUrl = newAvatarUrl,
             OrderIndex = dto.OrderIndex
         };
 
@@ -142,11 +144,12 @@ public class UnitService : IUnitService
     {
         var unit = await _context.Units.FindAsync(unitId);
         if (unit == null) return null;
+        var newAvatarUrl = await _cloudinaryService.UploadImageAsync(dto.AvatarFile);
 
         unit.GradeId = dto.GradeId;
         unit.Title = dto.Title;
         unit.Description = dto.Description;
-        unit.ImageUrl = dto.ImageUrl;
+        unit.ImageUrl = newAvatarUrl;
         unit.OrderIndex = dto.OrderIndex;
 
         await _context.SaveChangesAsync();

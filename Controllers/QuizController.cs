@@ -1,9 +1,10 @@
-﻿using System.Security.Claims;
-using KidsLearn.Common;
+﻿using KidsLearn.Common;
 using KidsLearn.DTOs.Quiz;
+using KidsLearn.Services;
 using KidsLearn.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KidsLearn.Controllers;
 
@@ -13,7 +14,6 @@ namespace KidsLearn.Controllers;
 public class QuizController : ControllerBase
 {
     private readonly IQuizService _quizService;
-
     public QuizController(IQuizService quizService)
     {
         _quizService = quizService;
@@ -62,16 +62,27 @@ public class QuizController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] CreateUpdateQuizDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateUpdateImageQuizDto dto)
     {
         // Validation cơ bản: phải có đúng 1 đáp án đúng
         var correctCount = dto.Answers?.Count(a => a.IsCorrect) ?? 0;
         if (correctCount != 1)
             return BadRequest(ApiResponse<string>.Fail("Câu hỏi phải có đúng 1 đáp án đúng"));
-
+        if (dto.ImageFile == null || dto.ImageFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
+        var quizDto =
+            new CreateUpdateQuizDto
+            {
+                UnitId = dto.UnitId,
+                QuestionText = dto.QuestionText,
+                QuestionType = dto.QuestionType,
+                TtsText = dto.TtsText,
+                ImageFile = dto.ImageFile,
+                Answers = dto.Answers
+            };
         try
         {
-            var created = await _quizService.CreateQuizAsync(dto);
+            var created = await _quizService.CreateQuizAsync(quizDto);
             return Ok(ApiResponse<object>.Ok(created, "Đã tạo câu hỏi"));
         }
         catch (KeyNotFoundException ex)
@@ -82,13 +93,28 @@ public class QuizController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateQuizDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateImageQuizDto dto)
     {
         var correctCount = dto.Answers?.Count(a => a.IsCorrect) ?? 0;
+        if(dto.ImageFile == null || dto.ImageFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
         if (correctCount != 1)
             return BadRequest(ApiResponse<string>.Fail("Câu hỏi phải có đúng 1 đáp án đúng"));
+        if (dto.ImageFile == null || dto.ImageFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
+        
+        var quizDto =
+            new CreateUpdateQuizDto
+            {
+                UnitId = dto.UnitId,
+                QuestionText = dto.QuestionText,
+                QuestionType = dto.QuestionType,
+                TtsText = dto.TtsText,
+                ImageFile = dto.ImageFile,
+                Answers = dto.Answers
+            };
 
-        var updated = await _quizService.UpdateQuizAsync(id, dto);
+        var updated = await _quizService.UpdateQuizAsync(id, quizDto);
         if (updated == null)
             return NotFound(ApiResponse<string>.Fail("Không tìm thấy câu hỏi"));
         return Ok(ApiResponse<object>.Ok(updated, "Đã cập nhật"));

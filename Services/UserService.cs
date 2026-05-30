@@ -1,6 +1,7 @@
 ﻿using KidsLearn.Data;
 using KidsLearn.DTOs.User;
 using KidsLearn.Helpers;
+using KidsLearn.Models;
 using KidsLearn.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +10,12 @@ namespace KidsLearn.Services;
 public class UserService : IUserService
 {
     private readonly KidsLearnDbContext _context;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public UserService(KidsLearnDbContext context)
+    public UserService(KidsLearnDbContext context, ICloudinaryService cloudinaryService) 
     {
         _context = context;
+        _cloudinaryService = cloudinaryService;
     }
 
     /// <summary>
@@ -79,23 +82,6 @@ public class UserService : IUserService
     }
 
     /// <summary>
-    /// User tự cập nhật profile (chỉ FullName và Avatar)
-    /// </summary>
-    public async Task<UserDto?> UpdateProfileAsync(int userId, UpdateProfileDto dto)
-    {
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null) return null;
-
-        if (!string.IsNullOrEmpty(dto.FullName))
-            user.FullName = dto.FullName;
-        if (!string.IsNullOrEmpty(dto.AvatarUrl))
-            user.AvatarUrl = dto.AvatarUrl;
-
-        await _context.SaveChangesAsync();
-        return MapToDto(user);
-    }
-
-    /// <summary>
     /// User đổi mật khẩu - phải nhập mật khẩu cũ để xác thực
     /// </summary>
     public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto dto)
@@ -151,6 +137,11 @@ public class UserService : IUserService
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return false;
+        if(user.AvatarUrl != null && user.AvatarUrl.Contains("res.cloudinary.com"))
+        {
+            var publicId = _cloudinaryService.GetPublicIdFromUrl(user.AvatarUrl);
+            await _cloudinaryService.DeleteImageAsync(publicId);
+        }
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
@@ -189,4 +180,36 @@ public class UserService : IUserService
         3 => "Smart Kid",
         _ => "Vocab Master"
     };
+
+    public async Task<UserDto?> UpdateProfileAsync(int userId, string fullName)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return null;
+
+        if (!string.IsNullOrEmpty(fullName))
+            user.FullName = fullName;
+        await _context.SaveChangesAsync();
+        return MapToDto(user);
+    }
+
+    public async Task<UserDto?> UpdateAvatarAsync(int userId, IFormFile file)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return null;
+
+        // Xóa ảnh cũ trên Cloudinary
+        if (!string.IsNullOrEmpty(user.AvatarUrl))
+        {
+            var oldPublicId = _cloudinaryService.GetPublicIdFromUrl(user.AvatarUrl);
+            await _cloudinaryService.DeleteImageAsync(oldPublicId);
+        }
+
+        // Upload ảnh mới
+        var newAvatarUrl = await _cloudinaryService.UploadImageAsync(file);
+
+        user.AvatarUrl = newAvatarUrl;
+        await _context.SaveChangesAsync();
+
+        return MapToDto(user);
+    }
 }

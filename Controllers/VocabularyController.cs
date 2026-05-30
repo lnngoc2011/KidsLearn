@@ -1,5 +1,6 @@
 ﻿using KidsLearn.Common;
 using KidsLearn.DTOs.Vocabulary;
+using KidsLearn.Services;
 using KidsLearn.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,8 @@ public class VocabularyController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateUpdateVocabDto dto)
     {
+        if (dto.ImageFile == null || dto.ImageFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
         var created = await _vocabService.CreateAsync(dto);
         return Ok(ApiResponse<object>.Ok(created, "Đã thêm từ vựng"));
     }
@@ -39,6 +42,8 @@ public class VocabularyController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateVocabDto dto)
     {
+        if (dto.ImageFile == null || dto.ImageFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
         var updated = await _vocabService.UpdateAsync(id, dto);
         if (updated == null)
             return NotFound(ApiResponse<string>.Fail("Không tìm thấy từ vựng"));

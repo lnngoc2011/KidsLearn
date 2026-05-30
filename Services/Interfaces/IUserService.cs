@@ -6,9 +6,9 @@ public interface IUserService
 {
     // ========== STUDENT (self) ==========
     Task<UserProfileDto?> GetMyProfileAsync(int userId);
-    Task<UserDto?> UpdateProfileAsync(int userId, UpdateProfileDto dto);
     Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto dto);
-
+    Task<UserDto?> UpdateProfileAsync(int userId, string fullName);
+    Task<UserDto?> UpdateAvatarAsync(int userId, IFormFile file);
     // ========== ADMIN ==========
     Task<List<UserDto>> GetAllUsersAsync();
     Task<UserDto?> GetUserByIdAsync(int userId);

@@ -1,9 +1,10 @@
-﻿using System.Security.Claims;
-using KidsLearn.Common;
+﻿using KidsLearn.Common;
 using KidsLearn.DTOs.User;
+using KidsLearn.Services;
 using KidsLearn.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KidsLearn.Controllers;
 
@@ -39,8 +40,26 @@ public class UserController : ControllerBase
         var userId = GetUserId();
         if (userId == 0)
             return Unauthorized(ApiResponse<string>.Fail("Phiên đăng nhập hết hạn"));
+        if (dto.FullName == null || dto.FullName.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có tên"));
+        var updated = await _userService.UpdateProfileAsync(userId, dto.FullName);
+        if (updated == null)
+            return NotFound(ApiResponse<string>.Fail("Không tìm thấy user"));
 
-        var updated = await _userService.UpdateProfileAsync(userId, dto);
+        return Ok(ApiResponse<object>.Ok(updated, "Cập nhật thành công"));
+    }
+
+    [HttpPut("me/avatar")]
+    public async Task<IActionResult> UpdateMyAvatar(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
+
+        var userId = GetUserId();
+        if (userId == 0)
+            return Unauthorized(ApiResponse<string>.Fail("Phiên đăng nhập hết hạn"));
+
+        var updated = await _userService.UpdateAvatarAsync(userId, file);
         if (updated == null)
             return NotFound(ApiResponse<string>.Fail("Không tìm thấy user"));
 

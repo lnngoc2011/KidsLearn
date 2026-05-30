@@ -43,6 +43,8 @@ public class UnitController : ControllerBase
     {
         try
         {
+            if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
+                return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
             var created = await _unitService.CreateUnitAsync(dto);
             return Ok(ApiResponse<object>.Ok(created, "Đã tạo Unit"));
         }
@@ -56,6 +58,9 @@ public class UnitController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateUnitDto dto)
     {
+
+        if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
+            return BadRequest(ApiResponse<string>.Fail("Không có file ảnh"));
         var updated = await _unitService.UpdateUnitAsync(id, dto);
         if (updated == null)
             return NotFound(ApiResponse<string>.Fail("Không tìm thấy Unit"));

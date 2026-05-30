@@ -1,18 +1,25 @@
-﻿using KidsLearn.Data;
+﻿using CloudinaryDotNet.Actions;
+using KidsLearn.Data;
 using KidsLearn.DTOs.Vocabulary;
+using KidsLearn.DTOs.ExternalApi;
 using KidsLearn.Models;
 using KidsLearn.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.Text.Json;
+using DictionaryEntry = KidsLearn.DTOs.ExternalApi.DictionaryEntry;
 
 namespace KidsLearn.Services;
 
 public class VocabularyService : IVocabularyService
 {
     private readonly KidsLearnDbContext _context;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public VocabularyService(KidsLearnDbContext context)
+    public VocabularyService(KidsLearnDbContext context, ICloudinaryService cloudinaryService)
     {
         _context = context;
+        _cloudinaryService = cloudinaryService;
     }
 
     /// <summary>
@@ -45,14 +52,26 @@ public class VocabularyService : IVocabularyService
         var unitExists = await _context.Units.AnyAsync(u => u.UnitId == dto.UnitId);
         if (!unitExists)
             throw new KeyNotFoundException($"Không tìm thấy Unit với ID = {dto.UnitId}");
+        var client = new HttpClient();
 
+        var response = await client.GetAsync(
+       $"https://api.dictionaryapi.dev/api/v2/entries/en/{dto.Word}"
+        );
+        if (!response.IsSuccessStatusCode)
+            throw new Exception("Không tìm thấy từ");
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<List<DictionaryEntry>>(json);
+        var entry = data?[0];
+
+       
+        var newAvatarUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile);
         var vocab = new Vocabulary
         {
             UnitId = dto.UnitId,
             Word = dto.Word,
             Mean = dto.Mean,
-            Ipa = dto.Ipa,
-            ImageUrl = dto.ImageUrl,
+            Ipa = entry.Phonetic,
+            ImageUrl = newAvatarUrl,
             Example = dto.Example,
             TtsText = dto.TtsText    // ✨ FIX
         };
@@ -69,12 +88,22 @@ public class VocabularyService : IVocabularyService
     public async Task<VocabularyDto?> UpdateAsync(int vocabId, CreateUpdateVocabDto dto)
     {
         var vocab = await _context.Vocabularies.FindAsync(vocabId);
+       
         if (vocab == null) return null;
+        var client = new HttpClient();
+        var response = await client.GetAsync(
+       $"https://api.dictionaryapi.dev/api/v2/entries/en/{vocab.Word}"
+        ); if (!response.IsSuccessStatusCode)
+            throw new Exception("Không tìm thấy từ");
+        var json = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<List<DictionaryEntry>>(json);
+        var entry = data?[0];
+        var newAvatarUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile);
 
         vocab.Word = dto.Word;
         vocab.Mean = dto.Mean;
-        vocab.Ipa = dto.Ipa;
-        vocab.ImageUrl = dto.ImageUrl;
+        vocab.Ipa = entry.Phonetic;
+        vocab.ImageUrl = newAvatarUrl;
         vocab.Example = dto.Example;
         vocab.TtsText = dto.TtsText;    // ✨ FIX
 
@@ -88,8 +117,10 @@ public class VocabularyService : IVocabularyService
     public async Task<bool> DeleteAsync(int vocabId)
     {
         var vocab = await _context.Vocabularies.FindAsync(vocabId);
-        if (vocab == null) return false;
 
+        if (vocab == null) return false;
+        var oldPublicId = _cloudinaryService.GetPublicIdFromUrl(vocab.ImageUrl);
+        await _cloudinaryService.DeleteImageAsync(oldPublicId);
         _context.Vocabularies.Remove(vocab);
         await _context.SaveChangesAsync();
         return true;

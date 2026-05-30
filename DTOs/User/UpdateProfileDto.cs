@@ -8,6 +8,4 @@ public class UpdateProfileDto
     [StringLength(100)]
     public string? FullName { get; set; }
 
-    [StringLength(255)]
-    public string? AvatarUrl { get; set; }
 }

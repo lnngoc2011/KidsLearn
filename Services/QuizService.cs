@@ -10,6 +10,7 @@ public class QuizService : IQuizService
 {
     private readonly KidsLearnDbContext _context;
     private readonly IGameService _Game;  // ✨ MỚI: Inject GameService
+    private readonly ICloudinaryService _cloudinaryService;
 
     private const decimal THRESHOLD_3_STARS = 90;
     private const decimal THRESHOLD_2_STARS = 70;
@@ -20,32 +21,32 @@ public class QuizService : IQuizService
     private const int XP_PER_CORRECT = 5;       // XP cho mỗi câu đúng
     private const int XP_BONUS_3_STARS = 20;    // Bonus khi đạt 3 sao
 
-    public QuizService(KidsLearnDbContext context, IGameService Game)
+    public QuizService(KidsLearnDbContext context, IGameService Game, ICloudinaryService cloudinaryService)
     {
         _context = context;
         _Game = Game;
+        _cloudinaryService = cloudinaryService;
     }
 
     public async Task<List<QuizDto>> GetByUnitAsync(int unitId)
     {
         return await _context.Quizzes
-            .Where(q => q.UnitId == unitId)
-            .Include(q => q.Answers)
-            .Select(q => new QuizDto
-            {
-                QuizId = q.QuizId,
-                QuestionText = q.QuestionText ?? "",
-                QuestionType = q.QuestionType ?? "text",
-                ImageUrl = q.ImageUrl,
-                TtsText = q.TtsText,
-                Answers = q.Answers.Select(a => new AnswerDto
-                {
-                    AnswerId = a.AnswerId,
-                    AnswerText = a.AnswerText ?? "",
-                    ImageUrl = a.ImageUrl
-                }).ToList()
-            })
-            .ToListAsync();
+         .Where(q => q.UnitId == unitId)
+         .Select(q => new QuizDto
+         {
+             QuizId = q.QuizId,
+             QuestionText = q.QuestionText ?? "",
+             QuestionType = q.QuestionType ?? "text",
+             ImageUrl = q.ImageUrl,
+             TtsText = q.TtsText,
+             Answers = q.Answers.Select(a => new AnswerDto
+             {
+                 AnswerId = a.AnswerId,
+                 AnswerText = a.AnswerText ?? "",
+                 ImageUrl = a.ImageUrl
+             }).ToList()
+         })
+         .ToListAsync();
     }
 
     /// <summary>
@@ -216,23 +217,39 @@ public class QuizService : IQuizService
         if (!dto.Answers.Any(a => a.IsCorrect))
             throw new InvalidOperationException("Quiz phải có ít nhất 1 đáp án đúng!");
 
+        // Upload ảnh cho Quiz (nullable)
+        var imageQuizUrl = dto.ImageFile != null
+            ? await _cloudinaryService.UploadImageAsync(dto.ImageFile)
+            : null;
+
         var quiz = new Quiz
         {
             UnitId = dto.UnitId,
             QuestionText = dto.QuestionText,
             QuestionType = dto.QuestionType,
-            ImageUrl = dto.ImageUrl,
+            ImageUrl = imageQuizUrl,        // 👈 ảnh của Quiz
             TtsText = dto.TtsText,
-            Answers = dto.Answers.Select(a => new Answer
-            {
-                AnswerText = a.AnswerText,
-                ImageUrl = a.ImageUrl,
-                IsCorrect = a.IsCorrect
-            }).ToList()
+            Answers = new List<Answer>()
         };
 
-        _context.Quizzes.Add(quiz);
+        // Upload ảnh riêng cho từng Answer
+        foreach (var a in dto.Answers)
+        {
+            var imageAnswerUrl = a.ImageFile != null
+                ? await _cloudinaryService.UploadImageAsync(a.ImageFile)
+                : null;
+
+            quiz.Answers.Add(new Answer
+            {
+                AnswerText = a.AnswerText,
+                ImageUrl = imageAnswerUrl,  // 👈 ảnh riêng của từng Answer
+                IsCorrect = a.IsCorrect
+            });
+        }
+
+        await _context.Quizzes.AddAsync(quiz);
         await _context.SaveChangesAsync();
+
         return MapToQuizDto(quiz);
     }
 
@@ -247,18 +264,51 @@ public class QuizService : IQuizService
         if (!dto.Answers.Any(a => a.IsCorrect))
             throw new InvalidOperationException("Quiz phải có ít nhất 1 đáp án đúng!");
 
+        // Xóa ảnh cũ của Quiz, upload ảnh mới nếu có
+        if (dto.ImageFile != null)
+        {
+            if (!string.IsNullOrEmpty(quiz.ImageUrl))
+            {
+                var oldPublicId = _cloudinaryService.GetPublicIdFromUrl(quiz.ImageUrl);
+                await _cloudinaryService.DeleteImageAsync(oldPublicId);
+            }
+            quiz.ImageUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile);
+        }
+
         quiz.QuestionText = dto.QuestionText;
         quiz.QuestionType = dto.QuestionType;
-        quiz.ImageUrl = dto.ImageUrl;
         quiz.TtsText = dto.TtsText;
 
-        _context.Answers.RemoveRange(quiz.Answers);
-        quiz.Answers = dto.Answers.Select(a => new Answer
+        // Xóa ảnh cũ của từng Answer trên Cloudinary
+        foreach (var oldAnswer in quiz.Answers)
         {
-            AnswerText = a.AnswerText,
-            ImageUrl = a.ImageUrl,
-            IsCorrect = a.IsCorrect
-        }).ToList();
+            if (!string.IsNullOrEmpty(oldAnswer.ImageUrl))
+            {
+                var oldPublicId = _cloudinaryService.GetPublicIdFromUrl(oldAnswer.ImageUrl);
+                await _cloudinaryService.DeleteImageAsync(oldPublicId);
+            }
+        }
+
+        // Xóa Answer cũ trong DB
+        _context.Answers.RemoveRange(quiz.Answers);
+
+        // Tạo Answer mới với ảnh riêng từng cái
+        var newAnswers = new List<Answer>();
+        foreach (var a in dto.Answers)
+        {
+            var imageAnswerUrl = a.ImageFile != null
+                ? await _cloudinaryService.UploadImageAsync(a.ImageFile)
+                : null;
+
+            newAnswers.Add(new Answer
+            {
+                AnswerText = a.AnswerText,
+                ImageUrl = imageAnswerUrl,  // 👈 ảnh riêng của từng Answer
+                IsCorrect = a.IsCorrect
+            });
+        }
+
+        quiz.Answers = newAnswers;
 
         await _context.SaveChangesAsync();
         return MapToQuizDto(quiz);
@@ -267,8 +317,13 @@ public class QuizService : IQuizService
     public async Task<bool> DeleteQuizAsync(int quizId)
     {
         var quiz = await _context.Quizzes.FindAsync(quizId);
-        if (quiz == null) return false;
 
+        if (quiz == null) return false;
+        if (!string.IsNullOrEmpty(quiz.ImageUrl))
+        {
+            var oldPublicId = _cloudinaryService.GetPublicIdFromUrl(quiz.ImageUrl);
+            await _cloudinaryService.DeleteImageAsync(oldPublicId);
+        }
         _context.Quizzes.Remove(quiz);
         await _context.SaveChangesAsync();
         return true;

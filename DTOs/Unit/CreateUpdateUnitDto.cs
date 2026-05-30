@@ -17,7 +17,7 @@ public class CreateUpdateUnitDto
     public string? Description { get; set; }
 
     [StringLength(255)]
-    public string? ImageUrl { get; set; }
+    public IFormFile? AvatarFile { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "OrderIndex phải lớn hơn 0")]
     public int OrderIndex { get; set; } = 1;
