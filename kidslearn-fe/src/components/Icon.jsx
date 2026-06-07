@@ -1,5 +1,4 @@
-// Material Symbols Outlined helper component.
-// Usage:  <Icon name="home" />  or  <Icon name="star" filled size={32} className="text-primary" />
+
 export default function Icon({ name, filled = false, size = 24, weight = 400, className = "", style }) {
   return (
     <span
