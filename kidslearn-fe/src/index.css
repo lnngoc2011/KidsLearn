@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply font-body text-on-background bg-background antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 { @apply font-display tracking-tight; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    user-select: none;
+  }
+}
+
+@layer components {
+  /* Chunky tactile button — primary CTA */
+  .btn-tactile {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-display font-bold
+           transition-all duration-150 select-none disabled:opacity-50 disabled:cursor-not-allowed;
+    border-bottom-width: 4px;
+  }
+  .btn-tactile:active:not(:disabled) {
+    transform: translateY(4px);
+    border-bottom-width: 0 !important;
+    margin-bottom: 4px;
+  }
+
+  /* Primary CTA — deep blue */
+  .btn-primary {
+    @apply btn-tactile bg-primary text-on-primary px-6 py-3 border-on-primary-fixed-variant
+           hover:bg-primary-container hover:text-on-primary-container;
+  }
+  /* Secondary — sunny yellow */
+  .btn-secondary {
+    @apply btn-tactile bg-secondary-container text-on-secondary-container px-6 py-3
+           border-secondary-fixed-dim hover:bg-secondary-fixed;
+  }
+  /* Tertiary — coral */
+  .btn-tertiary {
+    @apply btn-tactile bg-tertiary-container text-on-tertiary-container px-6 py-3
+           border-tertiary hover:bg-tertiary-fixed-dim;
+  }
+  /* Outline */
+  .btn-outline {
+    @apply btn-tactile bg-surface-container-lowest text-on-surface-variant px-6 py-3
+           border-outline-variant hover:bg-surface-container-high border-2;
+  }
+  /* Ghost */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full
+           text-on-surface-variant hover:bg-surface-container hover:text-on-surface
+           transition-colors font-body font-semibold;
+  }
+
+  /* Card with tactile bottom border */
+  .card {
+    @apply bg-surface-container-lowest rounded-lg p-6 border-2 border-surface-variant;
+    border-bottom-width: 4px;
+  }
+  .card-interactive {
+    @apply card hover:-translate-y-1 transition-transform cursor-pointer;
+  }
+
+  /* Chunky input */
+  .chunky-input {
+    @apply w-full h-14 px-4 rounded-[24px] border-2 border-surface-variant
+           bg-surface-container-lowest text-on-surface font-body
+           outline-none placeholder-outline transition-shadow;
+  }
+  .chunky-input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 99, 157, 0.25);
+    border-color: theme('colors.primary');
+  }
+
+  /* Pill / chip */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1
+           font-body font-bold text-label-lg;
+  }
+}
+
+/* Dotted decorative texture for hero backgrounds */
+.dotted-texture {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 2px, transparent 2px);
+  background-size: 32px 32px;
+}
+.dotted-texture-ink {
+  background-image: radial-gradient(circle, rgba(63, 72, 81, 0.12) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+/* Flashcard 3D flip utilities */
+.perspective-1000 { perspective: 1000px; }
+.transform-style-preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: theme('colors.outline-variant');
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track { background: transparent; }
