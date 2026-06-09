@@ -8,7 +8,7 @@ namespace KidsLearn.DTOs.ExternalApi
         public string? Word { get; set; }
 
         [JsonPropertyName("phonetic")]
-        public string? Phonetic { get; set; }   // ⚠️ Thường NULL với nhiều từ
+        public string? Phonetic { get; set; }   
 
         [JsonPropertyName("phonetics")]
         public List<Phonetic>? Phonetics { get; set; }
@@ -20,10 +20,10 @@ namespace KidsLearn.DTOs.ExternalApi
     public class Phonetic
     {
         [JsonPropertyName("text")]
-        public string? Text { get; set; }       // ⚠️ Có thể null (phonetics[0] của "hello")
+        public string? Text { get; set; }     
 
         [JsonPropertyName("audio")]
-        public string? Audio { get; set; }      // ⚠️ Có thể là "" hoặc null
+        public string? Audio { get; set; }      
     }
 
     public class Meaning
@@ -41,6 +41,6 @@ namespace KidsLearn.DTOs.ExternalApi
         public string? DefinitionText { get; set; }
 
         [JsonPropertyName("example")]
-        public string? Example { get; set; }    // ⚠️ Thường NULL (không phải định nghĩa nào cũng có example)
+        public string? Example { get; set; }    
     }
 }

@@ -25,8 +25,12 @@ export default function LoginPage() {
     try {
       const data = await login(form);
       toast.success(data.role === "Admin" ? "Chào mừng Admin! 🛡️" : "Chào mừng quay lại! 🎉");
-      const fallback = data.role === "Admin" ? "/admin" : "/";
-      navigate(location.state?.from?.pathname || fallback, { replace: true });
+
+      if (data.role === "Admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate(location.state?.from?.pathname || "/", { replace: true });
+      }
     } catch (err) {
       toast.error(err.userMessage || "Đăng nhập thất bại");
     } finally {

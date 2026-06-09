@@ -11,7 +11,6 @@ public class SubmitQuizRequestDto
 
     // Key: QuizId — Value: AnswerId học sinh chọn
     // Dictionary giúp map nhanh câu hỏi nào → đáp án nào
-    // ✨ FIX: Đổi "Answer" → "Answers"
     [Required]
     public Dictionary<int, int> Answers { get; set; } = new();
 }

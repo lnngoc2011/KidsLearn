@@ -12,26 +12,40 @@ export default function AdminDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [grades, units, users] = await Promise.all([
+        const [gradesRes, unitsRes, usersRes] = await Promise.all([
           gradeApi.getAll(),
           unitAdminApi.list(),
           userAdminApi.list(),
         ]);
-        
-        const vocabs = (units || []).reduce((s, u) => s + (u.vocabCount || 0), 0);
-        const quizzes = (units || []).reduce((s, u) => s + (u.quizCount || 0), 0);
-        const students = (users || []).filter((u) => u.role === "Student").length;
+
+        // 1. Kiểm tra an toàn: API trả về mảng trực tiếp hay bọc trong .data
+        const grades = Array.isArray(gradesRes) ? gradesRes : (gradesRes?.data || []);
+        const units = Array.isArray(unitsRes) ? unitsRes : (unitsRes?.data || []);
+        const users = Array.isArray(usersRes) ? usersRes : (usersRes?.data || []);
+
+        // Debug xem cấu trúc thực tế trả về là gì
+        console.log("Dữ liệu Units nhận được:", units);
+
+        // 2. Tính toán an toàn, bao quát các trường hợp đặt tên biến từ Backend
+        const vocabs = units.reduce((s, u) => s + (u.vocabCount || u.VocabCount || u.vocabs?.length || u.Vocabs?.length || 0), 0);
+        const quizzes = units.reduce((s, u) => s + (u.quizCount || u.QuizCount || u.quizzes?.length || u.Quizzes?.length || 0), 0);
+        const students = users.filter((u) => u.role === "Student" || u.Role === "Student").length;
+
+        // 3. Cập nhật State để hiển thị lên màn hình
         setStats({
-          grades: grades?.length || 0,
-          units: units?.length || 0,
-          vocabs, quizzes,
-          users: users?.length || 0,
+          grades: grades.length,
+          units: units.length,
+          vocabs,
+          quizzes,
+          users: users.length,
           students,
         });
-      } catch {} finally { 
-            console.log("load thanh cong");
-            setLoading(false); }
-      
+      } catch (error) {
+        console.error("Lỗi lấy dữ liệu dashboard:", error);
+      } finally {
+        console.log("Load thành công");
+        setLoading(false);
+      }
     })();
   }, []);
 

@@ -6,6 +6,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import PageHeader from "../components/PageHeader";
 import Icon from "../components/Icon";
 import ImageUpload from "../components/ImageUpload";
+import { getLevelInfo } from "../utils/helpers"; // ⭐ IMPORT
 
 export default function ProfilePage() {
   const { profile, loadingProfile, refreshProfile, user } = useAuth();
@@ -56,9 +57,8 @@ export default function ProfilePage() {
     finally { setSavingPw(false); }
   };
 
-  const totalXP = profile.totalXP ?? 0;
-  const xpInLevel = totalXP % 2000;
-  const xpPct = Math.round((xpInLevel / 2000) * 100);
+  // ⭐ TÍNH LEVEL ĐÚNG — thay cho 3 dòng cũ dùng % 2000
+  const lvl = getLevelInfo(profile.totalXP ?? 0);
 
   return (
     <div>
@@ -97,14 +97,26 @@ export default function ProfilePage() {
         {/* XP bar */}
         <div className="mt-6 relative">
           <div className="flex justify-between mb-1.5">
-            <span className="font-body font-bold text-label-lg text-on-primary-container">Cấp độ {profile.level}</span>
-            <span className="font-body font-bold text-label-lg text-on-primary-container">{xpInLevel} / 2000 XP</span>
+            <span className="font-body font-bold text-label-lg text-on-primary-container">
+              Cấp độ {lvl.level}
+            </span>
+            {/* ⭐ XP / NGƯỠNG LEVEL KẾ TIẾP */}
+            <span className="font-body font-bold text-label-lg text-on-primary-container">
+              {lvl.isMaxLevel
+                ? `${profile.totalXP} XP — MAX`
+                : `${profile.totalXP} / ${lvl.nextLevelXP} XP`}
+            </span>
           </div>
           <div className="w-full bg-surface-container-highest rounded-full h-4 border-2 border-surface-variant overflow-hidden">
-            <div className="bg-primary h-full rounded-full relative" style={{ width: `${xpPct}%` }}>
+            <div className="bg-primary h-full rounded-full relative" style={{ width: `${lvl.progress}%` }}>
               <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full" />
             </div>
           </div>
+          {!lvl.isMaxLevel && (
+            <p className="font-body text-label-lg text-on-primary-container/80 mt-1 text-right">
+              Còn {lvl.remainingXP} XP để lên cấp {lvl.level + 1}
+            </p>
+          )}
         </div>
       </div>
 

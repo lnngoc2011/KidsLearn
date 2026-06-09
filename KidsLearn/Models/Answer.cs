@@ -19,7 +19,7 @@ public partial class Answer
     // Navigation properties
     public virtual Quiz Quiz { get; set; } = null!;
 
-    // ✨ MỚI: Quan hệ với QuizAttemptDetail (đáp án này có bao nhiêu học sinh đã chọn)
+    // Quan hệ với QuizAttemptDetail (đáp án này có bao nhiêu học sinh đã chọn)
     public virtual ICollection<QuizAttemptDetail> QuizAttemptDetails { get; set; }
         = new List<QuizAttemptDetail>();
 }

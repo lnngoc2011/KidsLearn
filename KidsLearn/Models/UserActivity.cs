@@ -9,15 +9,15 @@ public partial class UserActivity
 {
     public int ActivityId { get; set; }
 
-    public int UserId { get; set; }              // FK → Users
+    public int UserId { get; set; }              
 
-    public int UnitId { get; set; }              // FK → Unit
+    public int UnitId { get; set; }              
 
     public int LastVocabIndex { get; set; }      // Vị trí từ vựng học dở (VD: 5/15)
 
     public DateTime LastAccessedAt { get; set; } // Lần truy cập gần nhất
 
-    public bool IsCompleted { get; set; }        // Đã hoàn thành Unit (Score >= 70)
+    public bool IsCompleted { get; set; }       
 
     // Navigation properties
     public virtual User User { get; set; } = null!;

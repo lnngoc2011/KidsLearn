@@ -11,19 +11,19 @@ public partial class Quiz
 
     public string? QuestionText { get; set; }
 
-    public string? QuestionType { get; set; }   // "text" | "image" | "audio"
+    public string? QuestionType { get; set; }   
 
     public string? ImageUrl { get; set; }
 
-    public string? TtsText { get; set; }        // Nội dung cho Text-to-Speech (không lưu file audio)
+    public string? TtsText { get; set; }     
 
     // Navigation properties
-    // ✨ FIX: Đổi "Answer" → "Answers" cho chuẩn convention
+    //Đổi "Answer" → "Answers" cho chuẩn convention
     public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
 
     public virtual Unit Unit { get; set; } = null!;
 
-    // ✨ MỚI: Quan hệ với QuizAttemptDetail (Review Mode)
+    //Quan hệ với QuizAttemptDetail (Review Mode)
     public virtual ICollection<QuizAttemptDetail> QuizAttemptDetails { get; set; }
         = new List<QuizAttemptDetail>();
 }

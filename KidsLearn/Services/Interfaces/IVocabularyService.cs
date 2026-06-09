@@ -4,7 +4,6 @@ namespace KidsLearn.Services.Interfaces;
 
 public interface IVocabularyService
 {
-    // ✨ FIX: rename param lessonId → unitId
     Task<List<VocabularyDto>> GetByUnitAsync(int unitId);
 
     // Admin

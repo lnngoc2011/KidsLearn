@@ -9,15 +9,24 @@ export default function QuizResultPage() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { refreshProfile } = useAuth();
-  const gradeId = state?.gradeId;
-  const result = state?.result;
-  const unitTitle = state?.unitTitle || "Unit";
+
+  const gradeId     = state?.gradeId;
+  const result      = state?.result;
+  const unitTitle   = state?.unitTitle || "Unit";
+  const quizzes     = state?.quizzes     || [];  
+  const userAnswers = state?.userAnswers || {};   
   const [showConfetti, setShowConfetti] = useState(true);
   const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
 
+  const isReviewMode = !unitId;
+
   useEffect(() => {
     if (!result) {
-      navigate(`/units/${unitId}/quiz`, { replace: true });
+      if (isReviewMode) {
+        navigate("/grades", { replace: true });
+      } else {
+        navigate(`/units/${unitId}/quiz`, { replace: true });
+      }
       return;
     }
     refreshProfile();
@@ -50,7 +59,7 @@ export default function QuizResultPage() {
       <div className={`rounded-xl bg-gradient-to-br ${tier.gradient} p-8 lg:p-12 text-center relative overflow-hidden border-4 ${tier.border} border-b-[8px]`}>
         <div className="absolute inset-0 dotted-texture opacity-30" />
         <div className="relative z-10">
-          <div className="text-7xl mb-4 ">{tier.emoji}</div>
+          <div className="text-7xl mb-4">{tier.emoji}</div>
           <span className="inline-flex items-center gap-1 chip bg-white/80 text-on-primary-container backdrop-blur mb-2">
             <Icon name="auto_awesome" size={14} filled /> {unitTitle}
           </span>
@@ -86,10 +95,10 @@ export default function QuizResultPage() {
 
       {/* Rewards grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        <RewardCard icon="bolt" label="XP nhận được" value={`+${result.xpGained}`} sub={`Tổng ${result.totalXP} XP`} color="bg-secondary-fixed text-on-secondary-container" />
-        <RewardCard icon="emoji_events" label="Cấp độ" value={`Lv ${result.level}`} sub={result.leveledUp ? "🎉 Lên cấp!" : result.levelName} highlight={result.leveledUp} color="bg-tertiary-fixed text-on-tertiary-container" />
-        <RewardCard icon="local_fire_department" label="Streak" value={`${result.currentStreak} ngày`} sub={result.isStreakMilestone ? "🔥 Mốc mới!" : "Tiếp tục nhé"} highlight={result.isStreakMilestone} color="bg-primary-fixed text-on-primary-container" />
-        <RewardCard icon="military_tech" label="Huy hiệu" value={result.newBadges?.length || 0} sub={result.newBadges?.length ? "Mở khóa!" : "Lần này chưa có"} highlight={(result.newBadges?.length || 0) > 0} color="bg-secondary-fixed text-on-secondary-container" />
+        <RewardCard icon="bolt"                 label="XP nhận được" value={`+${result.xpGained}`}              sub={`Tổng ${result.totalXP} XP`}                  color="bg-secondary-fixed text-on-secondary-container" />
+        <RewardCard icon="emoji_events"        label="Cấp độ"       value={`Lv ${result.level}`}               sub={result.leveledUp ? "🎉 Lên cấp!" : result.levelName} highlight={result.leveledUp} color="bg-tertiary-fixed text-on-tertiary-container" />
+        <RewardCard icon="local_fire_department" label="Streak"     value={`${result.currentStreak} ngày`}     sub={result.isStreakMilestone ? "🔥 Mốc mới!" : "Tiếp tục nhé"} highlight={result.isStreakMilestone} color="bg-primary-fixed text-on-primary-container" />
+        <RewardCard icon="military_tech"       label="Huy hiệu"     value={result.newBadges?.length || 0}       sub={result.newBadges?.length ? "Mở khóa!" : "Lần này chưa có"} highlight={(result.newBadges?.length || 0) > 0} color="bg-secondary-fixed text-on-secondary-container" />
       </div>
 
       {/* New badges */}
@@ -102,7 +111,9 @@ export default function QuizResultPage() {
             {result.newBadges.map((b) => (
               <div key={b.badgeId} className="card bg-surface-container-lowest text-center border-b-[4px] border-secondary-fixed-dim">
                 <div className="w-14 h-14 mx-auto rounded-full bg-secondary-fixed flex items-center justify-center mb-2">
-                  {b.iconUrl ? <img src={b.iconUrl} alt="" className="w-10 h-10" /> : <Icon name="military_tech" size={28} filled className="text-tertiary" />}
+                  {b.iconUrl
+                    ? <img src={b.iconUrl} alt="" className="w-10 h-10" />
+                    : <Icon name="military_tech" size={28} filled className="text-tertiary" />}
                 </div>
                 <div className="font-display font-bold text-body-md text-on-surface">{b.name}</div>
                 {b.description && <div className="font-body text-label-lg text-on-surface-variant mt-1">{b.description}</div>}
@@ -120,24 +131,145 @@ export default function QuizResultPage() {
         </div>
       )}
 
+      {/* Answer review */}
+      {quizzes.length > 0 && (
+        <div className="mt-6 card">
+          <h3 className="font-display text-headline-md flex items-center gap-2 text-on-surface mb-4">
+            <Icon name="fact_check" size={24} filled className="text-primary" />
+            Xem lại đáp án
+          </h3>
+
+          <div className="space-y-3">
+            {quizzes.map((quiz, idx) => {
+              const detail = result.details?.find(
+                (d) => d.quizId === quiz.quizId
+              );
+
+              const isCorrect = detail?.isCorrect;
+
+              // Tìm thông tin đáp án từ quiz.answers gốc theo yêu cầu của bạn
+              const selectedAnswer = quiz.answers?.find(
+                a => a.answerId === detail?.selectedAnswerId
+              );
+
+              const correctAnswer = quiz.answers?.find(
+                a => a.answerId === detail?.correctAnswerId
+              );
+
+              return (
+                <div
+                  key={quiz.quizId}
+                  className={`flex items-start gap-3 p-4 rounded-xl border-2 ${
+                    isCorrect
+                      ? "border-green-300 bg-green-50"
+                      : "border-red-300 bg-red-50"
+                  }`}
+                >
+                  {/* Icon */}
+                  <span className="text-xl mt-0.5">
+                    {isCorrect ? "✅" : "❌"}
+                  </span>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body font-bold text-body-md text-on-surface">
+                      Câu {idx + 1}
+                    </p>
+
+                    <p className="text-sm text-slate-700 mt-1">
+                      {detail?.questionText}
+                    </p>
+
+                    {/* TRƯỜNG HỢP LÀM SAI */}
+                    {!isCorrect && detail && (
+                      <div className="mt-2 space-y-3">
+                        <div>
+                          <div className="text-red-700 text-sm">
+                            Bạn chọn:
+                          </div>
+                          {selectedAnswer?.imageUrl ? (
+                            <img
+                              src={selectedAnswer?.imageUrl}
+                              alt="selected"
+                              className="h-16 rounded border mt-1" 
+                            />
+                          ) : (
+                            <div className="font-bold text-red-700">
+                              {selectedAnswer?.answerText}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <div className="text-green-700 text-sm">
+                            Đáp án đúng:
+                          </div>
+                          {correctAnswer?.imageUrl ? (
+                            <img
+                              src={correctAnswer?.imageUrl}
+                              alt="correct"
+                              className="h-16 rounded border border-green-400 mt-1" 
+                            />
+                          ) : (
+                            <div className="font-bold text-green-700">
+                              {correctAnswer?.answerText}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TRƯỜNG HỢP LÀM ĐÚNG */}
+                    {isCorrect && (
+                      <div className="mt-2">
+                        <div className="text-green-700 text-sm">
+                          Đáp án đúng bạn đã chọn:
+                        </div>
+                        {selectedAnswer?.imageUrl ? (
+                          <img
+                            src={selectedAnswer?.imageUrl}
+                            alt="correct-selected"
+                            className="h-16 rounded border border-green-400 mt-1" 
+                          />
+                        ) : (
+                          <div className="font-bold text-green-700 mt-1 text-sm">
+                            {selectedAnswer?.answerText}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="mt-8 flex flex-wrap gap-3 justify-center">
-        <Link to={`/units/${unitId}/quiz`} className="btn-primary">
-          <Icon name="restart_alt" size={20} /> Làm lại Quiz
-        </Link>
-        <Link to={`/units/${unitId}/learn`} className="btn-outline">
-          <Icon name="menu_book" size={20} /> Học lại từ vựng
-        </Link>
+        {!isReviewMode ? (
+          <>
+            <Link to={`/units/${unitId}/quiz`} className="btn-primary">
+              <Icon name="restart_alt" size={20} /> Làm lại Quiz
+            </Link>
+            <Link to={`/units/${unitId}/learn`} className="btn-outline">
+              <Icon name="menu_book" size={20} /> Học lại từ vựng
+            </Link>
+          </>
+        ) : (
+          <button onClick={() => navigate(-1)} className="btn-primary">
+            <Icon name="restart_alt" size={20} /> Thử sức bài khác
+          </button>
+        )}
+        
         <Link to="/progress" className="btn-ghost px-6 py-3">
           <Icon name="history" size={20} /> Xem lịch sử
         </Link>
-        <button
-  onClick={() => navigate(-2)}
-  className="btn-secondary"
->
-  <Icon name="auto_awesome" size={20} />
-  Học Unit khác
-</button>
+        <button onClick={() => navigate(gradeId ? `/grades/${gradeId}` : "/grades")} className="btn-secondary">
+          <Icon name="auto_awesome" size={20} />
+          Học Unit khác
+        </button>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ public partial class LearningProgress
 
     public int UnitId { get; set; }
 
-    // ✨ FIX: Đổi double → decimal vì DB lưu decimal(5,2)
+    // Đổi double → decimal vì DB lưu decimal(5,2)
     // Nếu để double sẽ sai khi map: SQL Server không tự cast double <-> decimal
     public decimal Score { get; set; }
 
@@ -21,7 +21,7 @@ public partial class LearningProgress
     public virtual Unit Unit { get; set; } = null!;
     public virtual User User { get; set; } = null!;
 
-    // ✨ MỚI: Chi tiết các câu trả lời của lượt làm bài này (Review Mode)
+    // Chi tiết các câu trả lời của lượt làm bài này (Review Mode)
     public virtual ICollection<QuizAttemptDetail> QuizAttemptDetails { get; set; }
         = new List<QuizAttemptDetail>();
 }

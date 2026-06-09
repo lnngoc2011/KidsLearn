@@ -17,8 +17,7 @@ public class ProgressService : IProgressService
 
     /// <summary>
     /// Lưu tiến độ học tập
-    /// ✨ FIX QUAN TRỌNG: TRƯỚC ĐÂY UPDATE record cũ (sai logic)
-    /// NAY: INSERT 1 record mới mỗi lần làm bài → giữ được lịch sử
+    ///  INSERT 1 record mới mỗi lần làm bài → giữ được lịch sử
     /// </summary>
     public async Task<ProgressResponseDto> SaveProgressAsync(int userId, SaveProgressDto dto)
     {
@@ -27,7 +26,6 @@ public class ProgressService : IProgressService
         if (unit == null)
             throw new KeyNotFoundException($"Không tìm thấy Unit với ID = {dto.UnitId}");
 
-        // ✨ FIX: Luôn tạo record mới (không update)
         var progress = new LearningProgress
         {
             UserId = userId,
@@ -70,7 +68,7 @@ public class ProgressService : IProgressService
     }
 
     /// <summary>
-    /// ✨ MỚI: Lấy điểm cao nhất của user trên 1 Unit
+    /// Lấy điểm cao nhất của user trên 1 Unit
     /// Dùng để hiển thị "Best Score" trên card Unit
     /// </summary>
     public async Task<ProgressResponseDto?> GetBestScoreAsync(int userId, int unitId)

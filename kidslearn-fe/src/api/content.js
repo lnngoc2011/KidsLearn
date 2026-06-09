@@ -20,7 +20,29 @@ export const vocabApi = {
 };
 
 export const quizApi = {
-  getByUnit: (unitId) => api.get("/quizzes", { params: { unitId } }).then((r) => r.data),
-  submit: (payload) => api.post("/quizzes/submit", payload).then((r) => r.data),
-  review: (progressId) => api.get(`/quizzes/review/${progressId}`).then((r) => r.data),
+  getByUnit: (unitId) =>
+    api.get("/quizzes", { params: { unitId } }).then((r) => r.data),
+
+  submit: (payload) =>
+    api.post("/quizzes/submit", payload).then((r) => r.data),
+
+
+  submitReview: (answers) => 
+    api.post("/quizzes/review/submit", answers).then((r) => r.data),
+
+
+  review: (progressId) =>
+    api.get(`/quizzes/review/${progressId}`).then((r) => r.data),
+
+  // Mid Review
+  getMidReview: (gradeId, reviewNumber) =>
+    api
+      .get(`/quizzes/review/${gradeId}/${reviewNumber}`)
+      .then((r) => r.data),
+
+  // Final Review 
+  getFinalReview: (gradeId) =>
+    api
+      .get(`/quizzes/final-review/${gradeId}`)
+      .then((r) => r.data),
 };

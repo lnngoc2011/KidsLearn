@@ -4,3 +4,5 @@ obj/
 *.user
 .idea/
 appsettings.Development.json
+kidslearn-fe/node_modules/
+kidslearn-fe/.vite/

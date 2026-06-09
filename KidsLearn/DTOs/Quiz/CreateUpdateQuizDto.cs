@@ -7,7 +7,7 @@ public class CreateUpdateQuizDto
     [Required]
     public int UnitId { get; set; }
 
-    // ✅ BỎ [Required] — Quiz dạng "image" hoặc "audio" có thể không cần text
+    // Quiz dạng "image" hoặc "audio" có thể không cần text
     // Validate sẽ làm ở Service: phải có ít nhất 1 trong (text/image/tts)
     [StringLength(255)]
     public string? QuestionText { get; set; }
@@ -31,12 +31,12 @@ public class CreateUpdateQuizDto
 
 public class CreateAnswerDto
 {
-    // ✅ BỎ [Required] — đáp án dạng "image" có thể không cần text
+    // đáp án dạng "image" có thể không cần text
     // Validate sẽ làm ở Service: phải có ít nhất 1 trong (text/image)
     [StringLength(255)]
     public string? AnswerText { get; set; }
 
-    // ✅ THÊM RegularExpression để match với CHECK constraint
+    // RegularExpression để match với CHECK constraint
     [RegularExpression("^(text|image)$",
         ErrorMessage = "AnswerType phải là: text hoặc image")]
     public string AnswerType { get; set; } = "text";

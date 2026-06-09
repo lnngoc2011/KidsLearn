@@ -24,7 +24,6 @@ public class VocabularyService : IVocabularyService
 
     /// <summary>
     /// Lấy danh sách từ vựng của 1 Unit
-    /// ✨ FIX: rename param lessonId → unitId, thêm TtsText
     /// </summary>
     public async Task<List<VocabularyDto>> GetByUnitAsync(int unitId)
     {
@@ -38,7 +37,7 @@ public class VocabularyService : IVocabularyService
                 Ipa = v.Ipa,
                 ImageUrl = v.ImageUrl,
                 Example = v.Example,
-                TtsText = v.TtsText    // ✨ FIX: thêm TtsText (đã thiếu)
+                TtsText = v.TtsText   
             })
             .ToListAsync();
     }
@@ -143,7 +142,7 @@ public class VocabularyService : IVocabularyService
         vocab.Ipa = ipa;
         vocab.ImageUrl = newAvatarUrl;
         vocab.Example = dto.Example;
-        vocab.TtsText = dto.TtsText;    // ✨ FIX
+        vocab.TtsText = dto.TtsText;    
 
         await _context.SaveChangesAsync();
         return MapToDto(vocab);

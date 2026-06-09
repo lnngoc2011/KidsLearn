@@ -15,7 +15,7 @@ public class QuizResultDto
 	public int StarCount { get; set; }
 	public string MotivationalMessage { get; set; } = string.Empty;
 
-	// ✨ MỚI: Thông tin Game mở rộng
+
 	public int XPGained { get; set; }                // XP nhận được lần này
 	public int TotalXP { get; set; }                 // Tổng XP hiện tại
 	public int Level { get; set; }                   // Level sau khi tính lại

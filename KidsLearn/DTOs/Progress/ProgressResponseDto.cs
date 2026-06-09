@@ -1,7 +1,6 @@
 ﻿namespace KidsLearn.DTOs.Progress;
 
 // Thông tin 1 lần làm quiz hoàn thành
-// ✨ FIX: Score là decimal đúng kiểu DB
 public class ProgressResponseDto
 {
     public int ProgressId { get; set; }

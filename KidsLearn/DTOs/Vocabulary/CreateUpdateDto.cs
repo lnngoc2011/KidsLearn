@@ -21,7 +21,6 @@ public class CreateUpdateVocabDto
     [StringLength(255)]
     public string? Example { get; set; }
 
-    // ✨ FIX: TtsText thay vì AudioUrl
     [StringLength(255)]
     public string? TtsText { get; set; }
 }
@@ -46,7 +45,6 @@ public class CreateUpdateImageVocabDto
     [StringLength(255)]
     public string? Example { get; set; }
 
-    // ✨ FIX: TtsText thay vì AudioUrl
     [StringLength(255)]
     public string? TtsText { get; set; }
 }

@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 const navItems = [
   { to: "/admin", label: "Tổng quan", icon: LayoutDashboard, end: true },
   { to: "/admin/grades", label: "Khối lớp", icon: GraduationCap },
-  { to: "/admin/units", label: "Chủ đề (Unit)", icon: BookOpen },
+  { to: "/admin/units", label: "Chủ đề", icon: BookOpen },
   { to: "/admin/vocabularies", label: "Từ vựng", icon: BookMarked },
   { to: "/admin/quizzes", label: "Câu hỏi Quiz", icon: PencilLine },
   { to: "/admin/users", label: "Người dùng", icon: Users },

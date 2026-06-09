@@ -8,7 +8,7 @@ public partial class UserStreak
 {
     public int StreakId { get; set; }
 
-    public int UserId { get; set; }              // FK → Users (UNIQUE)
+    public int UserId { get; set; }          
 
     public int CurrentStreak { get; set; }       // Chuỗi ngày hiện tại
 

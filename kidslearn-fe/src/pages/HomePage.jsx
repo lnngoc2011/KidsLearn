@@ -6,6 +6,7 @@ import { gradeApi } from "../api/content";
 import { activityApi } from "../api/activity";
 import LoadingScreen from "../components/LoadingScreen";
 import Icon from "../components/Icon";
+import { getLevelInfo } from "../utils/helpers"; // ⭐ IMPORT
 
 export default function HomePage() {
   const { profile, loadingProfile, user } = useAuth();
@@ -36,11 +37,9 @@ export default function HomePage() {
   if (loadingProfile || loading) return <LoadingScreen />;
 
   const name = profile?.fullName || user?.username || "bạn";
-  const totalXP = profile?.totalXP ?? 0;
-  const level = profile?.level ?? 1;
-  const xpInLevel = totalXP % 2000;
-  const xpPct = Math.round((xpInLevel / 2000) * 100);
-  const xpToNext = 2000 - xpInLevel;
+
+  // ⭐ TÍNH LEVEL ĐÚNG — thay cho 3 dòng cũ dùng % 2000
+  const lvl = getLevelInfo(profile?.totalXP ?? 0);
 
   return (
     <div className="flex flex-col gap-12">
@@ -93,20 +92,25 @@ export default function HomePage() {
                 <p className="font-body font-bold text-label-lg text-outline mb-1 uppercase tracking-wider">Cấp Độ Hiện Tại</p>
                 <h2 className="font-display text-headline-lg text-primary flex items-center gap-2">
                   <Icon name="star" size={36} filled className="text-secondary-container" />
-                  Level {level}
+                  Level {lvl.level}
                 </h2>
               </div>
+              {/* ⭐ HIỂN THỊ XP / NGƯỠNG LEVEL KẾ TIẾP */}
               <span className="font-body font-bold text-label-lg text-primary-container">
-                {xpInLevel} / 2000 XP
+                {lvl.isMaxLevel
+                  ? `${profile?.totalXP ?? 0} XP`
+                  : `${profile?.totalXP ?? 0} / ${lvl.nextLevelXP} XP`}
               </span>
             </div>
             <div className="w-full bg-surface-container-highest rounded-full h-6 border-2 border-surface-variant overflow-hidden relative">
-              <div className="bg-primary h-full rounded-full relative transition-all" style={{ width: `${xpPct}%` }}>
+              <div className="bg-primary h-full rounded-full relative transition-all" style={{ width: `${lvl.progress}%` }}>
                 <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/20 rounded-t-full" />
               </div>
             </div>
             <p className="font-body text-body-md text-on-surface-variant mt-3 text-center">
-              Còn {xpToNext} XP để lên cấp {level + 1}! Cố lên!
+              {lvl.isMaxLevel
+                ? "🎉 Bạn đã đạt cấp tối đa!"
+                : `Còn ${lvl.remainingXP} XP để lên cấp ${lvl.level + 1}! Cố lên!`}
             </p>
           </div>
 

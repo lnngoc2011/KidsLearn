@@ -20,7 +20,7 @@ public partial class Unit
     // Navigation properties
     public virtual Grade Grade { get; set; } = null!;
 
-    // ✨ FIX: Đổi từ "Vocabulary"/"Quiz" sang "Vocabularies"/"Quizzes" (số nhiều - chuẩn EF)
+    //
     public virtual ICollection<Vocabulary> Vocabularies { get; set; }
         = new List<Vocabulary>();
 
@@ -30,7 +30,7 @@ public partial class Unit
     public virtual ICollection<LearningProgress> LearningProgresses { get; set; }
         = new List<LearningProgress>();
 
-    // ✨ MỚI: Quan hệ với UserActivity (Continue Learning)
+    // Quan hệ với UserActivity (Continue Learning)
     public virtual ICollection<UserActivity> UserActivities { get; set; }
         = new List<UserActivity>();
 }

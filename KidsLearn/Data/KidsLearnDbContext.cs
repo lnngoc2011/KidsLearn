@@ -27,9 +27,8 @@ public partial class KidsLearnDbContext : DbContext
     {
     }
 
-    // =========================================================
     // DB SETS - 12 BẢNG (7 cũ + 5 mới)
-    // =========================================================
+
 
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Grade> Grades { get; set; }
@@ -39,22 +38,20 @@ public partial class KidsLearnDbContext : DbContext
     public virtual DbSet<Answer> Answers { get; set; }
     public virtual DbSet<LearningProgress> LearningProgresses { get; set; }
 
-    // ✨ MỚI: 5 DbSet cho 5 bảng mới
+    // 5 DbSet cho 5 bảng mới
     public virtual DbSet<QuizAttemptDetail> QuizAttemptDetails { get; set; }
     public virtual DbSet<UserStreak> UserStreaks { get; set; }
     public virtual DbSet<UserActivity> UserActivities { get; set; }
     public virtual DbSet<Badge> Badges { get; set; }
     public virtual DbSet<UserBadge> UserBadges { get; set; }
 
-    // =========================================================
     // MODEL CONFIGURATION (Fluent API)
-    // =========================================================
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // =====================================================
         // USER
-        // =====================================================
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId);
@@ -66,15 +63,12 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.AvatarUrl).HasMaxLength(255);
             entity.Property(e => e.Role).HasMaxLength(20);
             entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-
-            // ✨ MỚI: 2 cột bổ sung
             entity.Property(e => e.TotalXP).HasDefaultValue(0);
             entity.Property(e => e.Level).HasDefaultValue(1).HasColumnName("Level");
         });
 
-        // =====================================================
         // GRADE
-        // =====================================================
+
         modelBuilder.Entity<Grade>(entity =>
         {
             entity.HasKey(e => e.GradeId);
@@ -83,9 +77,8 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.GradeName).HasMaxLength(50);
         });
 
-        // =====================================================
         // UNIT
-        // =====================================================
+
         modelBuilder.Entity<Unit>(entity =>
         {
             entity.HasKey(e => e.UnitId);
@@ -102,9 +95,8 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_Unit_Grade");
         });
 
-        // =====================================================
+
         // VOCABULARY
-        // =====================================================
         modelBuilder.Entity<Vocabulary>(entity =>
         {
             entity.HasKey(e => e.VocabId);
@@ -124,9 +116,8 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_Vocabulary_Unit");
         });
 
-        // =====================================================
         // QUIZ
-        // =====================================================
+
         modelBuilder.Entity<Quiz>(entity =>
         {
             entity.HasKey(e => e.QuizId);
@@ -144,9 +135,8 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_Quiz_Unit");
         });
 
-        // =====================================================
         // ANSWER
-        // =====================================================
+
         modelBuilder.Entity<Answer>(entity =>
         {
             entity.HasKey(e => e.AnswerId);
@@ -163,9 +153,8 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_Answer_Quiz");
         });
 
-        // =====================================================
         // LEARNING PROGRESS
-        // =====================================================
+
         modelBuilder.Entity<LearningProgress>(entity =>
         {
             entity.HasKey(e => e.ProgressId);
@@ -185,11 +174,11 @@ public partial class KidsLearnDbContext : DbContext
                 .WithMany(p => p.LearningProgresses)
                 .HasForeignKey(d => d.UnitId)
                 .HasConstraintName("FK_Progress_Unit");
-        });
+          });
 
-        // =====================================================
-        // ✨ MỚI: QUIZ ATTEMPT DETAIL
-        // =====================================================
+
+        //  QUIZ ATTEMPT DETAIL
+
         modelBuilder.Entity<QuizAttemptDetail>(entity =>
         {
             entity.HasKey(e => e.DetailId);
@@ -221,9 +210,9 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_QuizAttemptDetail_Answer");
         });
 
-        // =====================================================
-        // ✨ MỚI: USER STREAK
-        // =====================================================
+
+        //  USER STREAK
+
         modelBuilder.Entity<UserStreak>(entity =>
         {
             entity.HasKey(e => e.StreakId);
@@ -232,7 +221,7 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("UserID");
             entity.Property(e => e.LastStudyDate).HasColumnType("date");
 
-            // UNIQUE: mỗi user chỉ có 1 record streak
+            // Mỗi user chỉ có 1 record streak
             entity.HasIndex(e => e.UserId).IsUnique();
 
             entity.HasOne(d => d.User)
@@ -242,9 +231,7 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_UserStreak_Users");
         });
 
-        // =====================================================
-        // ✨ MỚI: USER ACTIVITY
-        // =====================================================
+        //  USER ACTIVITY
         modelBuilder.Entity<UserActivity>(entity =>
         {
             entity.HasKey(e => e.ActivityId);
@@ -254,7 +241,7 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.UnitId).HasColumnName("UnitID");
             entity.Property(e => e.LastAccessedAt).HasColumnType("datetime");
 
-            // UNIQUE: mỗi user có 1 record cho mỗi Unit
+            // Mỗi user có 1 record cho mỗi Unit
             entity.HasIndex(e => new { e.UserId, e.UnitId }).IsUnique();
 
             entity.HasOne(d => d.User)
@@ -270,9 +257,8 @@ public partial class KidsLearnDbContext : DbContext
                 .HasConstraintName("FK_UserActivity_Unit");
         });
 
-        // =====================================================
-        // ✨ MỚI: BADGE
-        // =====================================================
+        // BADGE
+
         modelBuilder.Entity<Badge>(entity =>
         {
             entity.HasKey(e => e.BadgeId);
@@ -284,9 +270,7 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.ConditionType).HasMaxLength(255);
         });
 
-        // =====================================================
-        // ✨ MỚI: USER BADGE (bảng quan hệ N-N)
-        // =====================================================
+        // USER BADGE 
         modelBuilder.Entity<UserBadge>(entity =>
         {
             entity.HasKey(e => e.UserBadgeId);
@@ -296,7 +280,7 @@ public partial class KidsLearnDbContext : DbContext
             entity.Property(e => e.BadgeId).HasColumnName("BadgeID");
             entity.Property(e => e.EarnedAt).HasColumnType("datetime");
 
-            // UNIQUE: 1 user chỉ nhận 1 huy hiệu 1 lần
+            // 1 user chỉ nhận 1 huy hiệu 1 lần
             entity.HasIndex(e => new { e.UserId, e.BadgeId }).IsUnique();
 
             entity.HasOne(d => d.User)

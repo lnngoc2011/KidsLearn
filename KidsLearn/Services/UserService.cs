@@ -18,10 +18,8 @@ public class UserService : IUserService
         _cloudinaryService = cloudinaryService;
     }
 
-    /// <summary>
-    /// ✨ MỚI: Profile tổng hợp cho Dashboard học sinh
-    /// Gộp dữ liệu từ: Users, UserStreak, LearningProgress, UserBadge
-    /// </summary>
+    ///  Profile tổng hợp cho Dashboard học sinh
+
     public async Task<UserProfileDto?> GetMyProfileAsync(int userId)
     {
         var user = await _context.Users
@@ -30,7 +28,6 @@ public class UserService : IUserService
 
         if (user == null) return null;
 
-        // ✅ Nếu UserStreak chưa tồn tại → tự động tạo
         if (user.UserStreak == null)
         {
             var streak = new UserStreak
@@ -45,9 +42,6 @@ public class UserService : IUserService
             user.UserStreak = streak;
         }
 
-        // ✅ Các bảng chưa có dữ liệu → trả về 0 (không crash)
-        // LearningProgress, UserBadge dùng CountAsync/ToListAsync
-        // sẽ tự trả về 0 / list rỗng nếu chưa có bản ghi
 
         var attempted = await _context.LearningProgresses
             .Where(p => p.UserId == userId)
@@ -67,7 +61,6 @@ public class UserService : IUserService
             .Select(g => g.Max(x => x.Score))
             .ToListAsync();
 
-        // ✅ maxScores rỗng → trả về 0, không crash
         decimal avgScore = maxScores.Count > 0
             ? Math.Round(maxScores.Average(), 2)
             : 0;
@@ -75,7 +68,6 @@ public class UserService : IUserService
         var totalQuizzes = await _context.LearningProgresses
             .CountAsync(p => p.UserId == userId);
 
-        // ✅ Chưa có badge → trả về 0, không crash
         var badgesCount = await _context.UserBadges
             .CountAsync(ub => ub.UserId == userId);
 
@@ -88,7 +80,6 @@ public class UserService : IUserService
             TotalXP = user.TotalXP,
             Level = user.Level,
             LevelName = GetLevelName(user.Level),
-            // ✅ Dùng ?. và ?? để tránh null
             CurrentStreak = user.UserStreak?.CurrentStreak ?? 0,
             LongestStreak = user.UserStreak?.LongestStreak ?? 0,
             TotalUnitsAttempted = attempted,
@@ -99,19 +90,15 @@ public class UserService : IUserService
         };
     }
 
-    /// <summary>
     /// User đổi mật khẩu - phải nhập mật khẩu cũ để xác thực
-    /// </summary>
     public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto dto)
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return false;
 
-        // ✅ 1. Kiểm tra mật khẩu cũ đúng không
         if (!PasswordHelper.VerifyPassword(dto.OldPassword, user.PasswordHash))
             throw new UnauthorizedAccessException("Mật khẩu cũ không đúng!");
 
-        // ✅ 2. Mật khẩu mới không được trùng mật khẩu cũ
         if (PasswordHelper.VerifyPassword(dto.NewPassword, user.PasswordHash))
             throw new InvalidOperationException("Mật khẩu mới không được trùng mật khẩu cũ!");
 
@@ -223,7 +210,6 @@ public class UserService : IUserService
         // Xóa ảnh cũ
         if (!string.IsNullOrEmpty(user.AvatarUrl))
         {
-            // ✅ Dùng thẳng DeleteImageAsync với URL, không cần gọi GetPublicId riêng
             await _cloudinaryService.DeleteImageAsync(user.AvatarUrl);
         }
 

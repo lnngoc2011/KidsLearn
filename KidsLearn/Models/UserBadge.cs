@@ -9,9 +9,9 @@ public partial class UserBadge
 {
     public int UserBadgeId { get; set; }
 
-    public int UserId { get; set; }       // FK → Users
+    public int UserId { get; set; }       
 
-    public int BadgeId { get; set; }      // FK → Badge
+    public int BadgeId { get; set; }     
 
     public DateTime EarnedAt { get; set; } // Thời gian đạt được
 

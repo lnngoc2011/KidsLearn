@@ -1,6 +1,6 @@
 ﻿namespace KidsLearn.DTOs.User;
 
-// ✨ MỚI: Profile tổng hợp của học sinh trên Dashboard cá nhân
+// tổng hợp của học sinh trên Dashboard cá nhân
 // Gộp dữ liệu từ nhiều bảng: User, UserStreak, LearningProgress
 public class UserProfileDto
 {

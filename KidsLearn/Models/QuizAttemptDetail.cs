@@ -9,13 +9,13 @@ public partial class QuizAttemptDetail
 {
     public int DetailId { get; set; }
 
-    public int ProgressId { get; set; }       // FK → LearningProgress (lượt làm bài)
+    public int ProgressId { get; set; }    
 
-    public int QuizId { get; set; }            // FK → Quiz (câu hỏi)
+    public int QuizId { get; set; }         
 
-    public int? SelectedAnswerId { get; set; } // FK → Answer (đáp án học sinh chọn, có thể null)
+    public int? SelectedAnswerId { get; set; }
 
-    public bool IsCorrect { get; set; }        // Câu này đúng hay sai
+    public bool IsCorrect { get; set; }       
 
     // Navigation properties
     public virtual LearningProgress Progress { get; set; } = null!;

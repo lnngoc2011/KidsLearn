@@ -37,9 +37,22 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/grades" element={<GradesPage />} />
         <Route path="/grades/:gradeId" element={<UnitsPage />} />
+
+        {/* Thêm mới cấu trúc tuyến đường Review */}
+        <Route
+          path="/grades/:gradeId/review/:reviewNumber"
+          element={<QuizPage />}
+        />
+
+        <Route
+          path="/grades/:gradeId/final-review"
+          element={<QuizPage />}
+        />
+
         <Route path="/units/:unitId/learn" element={<VocabularyPage />} />
         <Route path="/units/:unitId/quiz" element={<QuizPage />} />
         <Route path="/units/:unitId/result" element={<QuizResultPage />} />
+        <Route path="/units/review/result" element={<QuizResultPage />} />
         <Route path="/progress" element={<ProgressPage />} />
         <Route path="/badges" element={<BadgesPage />} />
         <Route path="/profile" element={<ProfilePage />} />

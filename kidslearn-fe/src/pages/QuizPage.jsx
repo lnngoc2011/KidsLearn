@@ -8,7 +8,15 @@ import EmptyState from "../components/EmptyState";
 import Icon from "../components/Icon";
 
 export default function QuizPage() {
-  const { unitId } = useParams();
+
+  const params = useParams();
+  const rawUnitId = params.unitId || params.id;
+  const gradeId = params.gradeId;
+  const reviewNumber = params.reviewNumber;
+
+
+  const parsedUnitId = rawUnitId ? parseInt(rawUnitId, 10) : 0;
+
   const navigate = useNavigate();
   const [unit, setUnit] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
@@ -19,14 +27,41 @@ export default function QuizPage() {
   const { speak, supported } = useTTS();
 
   useEffect(() => {
-    (async () => {
+    const loadData = async () => {
       try {
-        const [u, q] = await Promise.all([unitApi.getById(unitId), quizApi.getByUnit(unitId)]);
-        setUnit(u);
-        setQuizzes(q || []);
-      } finally { setLoading(false); }
-    })();
-  }, [unitId]);
+        setLoading(true);
+
+        // Quiz của một Unit cụ thể
+        if (parsedUnitId > 0) {
+          const [u, q] = await Promise.all([
+            unitApi.getById(parsedUnitId),
+            quizApi.getByUnit(parsedUnitId),
+          ]);
+          setUnit(u);
+          setQuizzes(q || []);
+        }
+        // Mid Review
+        else if (reviewNumber) {
+          const q = await quizApi.getMidReview(gradeId, reviewNumber);
+          setUnit({ title: `Review ${reviewNumber}`, gradeId });
+          setQuizzes(q || []);
+        }
+        // Final Review
+        else {
+          const q = await quizApi.getFinalReview(gradeId);
+          setUnit({ title: "Final Review", gradeId });
+          setQuizzes(q || []);
+        }
+      } catch (err) {
+        console.error("Lỗi tải dữ liệu:", err);
+        toast.error("Không thể tải câu hỏi. Vui lòng thử lại!");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [parsedUnitId, gradeId, reviewNumber]);
 
   const current = quizzes[idx];
   const totalAnswered = useMemo(() => Object.keys(answers).length, [answers]);
@@ -34,11 +69,12 @@ export default function QuizPage() {
   const allAnswered = quizzes.length > 0 && totalAnswered === quizzes.length;
 
   if (loading) return <LoadingScreen />;
+
   if (!quizzes.length) {
     return (
       <EmptyState
         title={unit?.title ? `${unit.title} chưa có câu hỏi` : "Chưa có câu hỏi"}
-        hint="Hãy thử Unit khác hoặc quay lại sau!"
+        hint="Hãy thử bài học khác hoặc quay lại sau nhé!"
         action={<Link to="/grades" className="btn-primary">Về danh sách lớp</Link>}
       />
     );
@@ -51,39 +87,56 @@ export default function QuizPage() {
     if (idx < quizzes.length - 1) setIdx(idx + 1);
   };
 
+  // ⭐ FIX: xử lý 2 trường hợp — Quiz Unit thường và Review
   const submit = async () => {
-  if (!allAnswered)
-    return toast.error(
-      `Còn ${quizzes.length - totalAnswered} câu chưa trả lời!`
-    );
+    if (!allAnswered) {
+      return toast.error(`Còn ${quizzes.length - totalAnswered} câu chưa trả lời!`);
+    }
 
-  setSubmitting(true);
+    setSubmitting(true);
 
-  try {
-    const result = await quizApi.submit({
-      unitId: Number(unitId),
-      answers,
-    });
+    try {
+      let result;
 
-    navigate(`/units/${unitId}/result`, {
-      state: {
-        result,
-        unitTitle: unit?.title,
-        gradeId: unit?.gradeId,
-      },
-    });
-  } catch (err) {
-    console.error(err);
+      if (parsedUnitId > 0) {
+        // CASE 1: Quiz Unit bình thường
+        result = await quizApi.submit({
+          unitId: parsedUnitId,
+          answers,
+        });
 
-    toast.error(
-      err?.response?.data?.message ||
-      err?.userMessage ||
-      "Nộp bài thất bại"
-    );
-  } finally {
-    setSubmitting(false);
-  }
-};
+        navigate(`/units/${parsedUnitId}/result`, {
+          state: {
+            result,
+            quizzes,
+            userAnswers: answers,
+            unitTitle: unit?.title,
+            gradeId: unit?.gradeId,
+          },
+        });
+      } else {
+        // CASE 2 + 3: Review (Mid hoặc Final) — gọi endpoint review/submit
+        result = await quizApi.submitReview(answers);
+
+        navigate("/units/review/result", {
+          state: {
+            result,
+            quizzes,
+            userAnswers: answers,
+            unitTitle: unit?.title,
+            gradeId: unit?.gradeId || parseInt(gradeId, 10),
+          },
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err?.response?.data?.message || err?.userMessage || "Nộp bài thất bại"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const selected = answers[current.quizId];
   const isAudio = current.questionType === "audio";
@@ -143,19 +196,19 @@ export default function QuizPage() {
           </div>
         ) : (
           <>
-           <h2 className="font-display text-headline-lg text-on-surface">
-  {current.questionText}
-</h2>
+            <h2 className="font-display text-headline-lg text-on-surface">
+              {current.questionText}
+            </h2>
 
-{isImage && current.imageUrl && (
-  <div className="mt-6 flex justify-center">
-    <img
-      src={current.imageUrl}
-      alt=""
-      className="w-64 h-64 object-cover rounded-3xl shadow-lg"
-    />
-  </div>
-)}
+            {isImage && current.imageUrl && (
+              <div className="mt-6 flex justify-center">
+                <img
+                  src={current.imageUrl}
+                  alt=""
+                  className="w-64 h-64 object-cover rounded-3xl shadow-lg"
+                />
+              </div>
+            )}
           </>
         )}
 
@@ -182,27 +235,27 @@ export default function QuizPage() {
                   {letter}
                 </span>
                 {a.answerType === "image" ? (
-  <div className="flex justify-center items-center">
-    <img
-      src={a.imageUrl}
-      alt={a.answerText}
-      className="w-32 h-32 object-contain rounded-md bg-surface-container"
-    />
-  </div>
-) : a.answerType === "audio" ? (
-  <div className="flex items-center gap-2">
-    <Icon name="volume_up" size={20} />
-    <span>Nghe đáp án</span>
-  </div>
-) : (
-  <p
-    className={`font-display font-bold pr-9 ${
-      isSelected ? "text-on-primary" : "text-on-surface"
-    }`}
-  >
-    {a.answerText}
-  </p>
-)}
+                  <div className="flex justify-center items-center">
+                    <img
+                      src={a.imageUrl}
+                      alt={a.answerText}
+                      className="w-32 h-32 object-contain rounded-md bg-surface-container"
+                    />
+                  </div>
+                ) : a.answerType === "audio" ? (
+                  <div className="flex items-center gap-2">
+                    <Icon name="volume_up" size={20} />
+                    <span>Nghe đáp án</span>
+                  </div>
+                ) : (
+                  <p
+                    className={`font-display font-bold pr-9 ${
+                      isSelected ? "text-on-primary" : "text-on-surface"
+                    }`}
+                  >
+                    {a.answerText}
+                  </p>
+                )}
               </button>
             );
           })}

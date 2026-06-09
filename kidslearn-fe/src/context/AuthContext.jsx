@@ -24,6 +24,7 @@ export function AuthProvider({ children }) {
     setUser({ userId: data.userId, username: data.username, role: data.role });
   };
 
+  
   const login = async ({ username, password }) => {
     const data = await authApi.login({ username, password });
     persist(data);
@@ -59,7 +60,6 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (user && !profile) refreshProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (

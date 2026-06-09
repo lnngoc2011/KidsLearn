@@ -49,19 +49,12 @@ public class QuizService : IQuizService
          .ToListAsync();
     }
 
-    /// <summary>
-    /// Học sinh nộp bài Quiz - ĐÃ TÍCH HỢP GAME
-    /// Flow:
-    ///   1. Chấm điểm
-    ///   2. Lưu LearningProgress + QuizAttemptDetail
-    ///   3. ✨ Cập nhật UserActivity (đánh dấu hoàn thành nếu đạt yêu cầu)
-    ///   4. ✨ Cập nhật Streak
-    ///   5. ✨ Cộng XP và check Level Up
-    ///   6. ✨ Kiểm tra và trao huy hiệu mới
-    /// </summary>
+
+    /// Học sinh nộp bài Quiz 
+
     public async Task<QuizResultDto> SubmitQuizAsync(int userId, SubmitQuizRequestDto request)
     {
-        // ───── BƯỚC 1: Lấy Quiz của Unit ─────
+        // Lấy Quiz của Unit 
         var quizzes = await _context.Quizzes
             .Where(q => q.UnitId == request.UnitId)
             .Include(q => q.Answers)
@@ -70,7 +63,7 @@ public class QuizService : IQuizService
         if (!quizzes.Any())
             throw new KeyNotFoundException("Không tìm thấy câu hỏi cho Unit này!");
 
-        // ───── BƯỚC 2: Chấm điểm ─────
+        // Chấm điểm 
         var details = new List<QuizAnswerDetailDto>();
         var attemptDetails = new List<QuizAttemptDetail>();
         int correctCount = 0;
@@ -110,7 +103,7 @@ public class QuizService : IQuizService
             ? Math.Round((decimal)correctCount / quizzes.Count * 100, 2)
             : 0;
 
-        // ───── BƯỚC 3: Lưu LearningProgress ─────
+        // Lưu LearningProgress 
         var progress = new LearningProgress
         {
             UserId = userId,
@@ -121,14 +114,14 @@ public class QuizService : IQuizService
         _context.LearningProgresses.Add(progress);
         await _context.SaveChangesAsync();
 
-        // ───── BƯỚC 4: Lưu QuizAttemptDetail ─────
+        // Lưu QuizAttemptDetail 
         foreach (var detail in attemptDetails)
             detail.ProgressId = progress.ProgressId;
 
         _context.QuizAttemptDetails.AddRange(attemptDetails);
         await _context.SaveChangesAsync();
 
-        // ───── ✨ BƯỚC 4.5: Cập nhật UserActivity ─────
+        //  Cập nhật UserActivity
         var activity = await _context.UserActivities
             .FirstOrDefaultAsync(a => a.UserId == userId && a.UnitId == request.UnitId);
 
@@ -152,13 +145,11 @@ public class QuizService : IQuizService
         }
         await _context.SaveChangesAsync();
 
-        // ───── BƯỚC 5: Tính sao + lời khen ─────
+        // Tính sao + lời khen 
         int stars = CalculateStars(score);
         string message = GetMotivationalMessage(score);
 
-        // ═══════════════════════════════════════════════
-        // ✨ TÍCH HỢP GAMIFICATION ✨
-        // ═══════════════════════════════════════════════
+        //  TÍCH HỢP GAMIFICATION 
 
         var streakResult = await _Game.UpdateStreakAsync(userId);
 
@@ -167,7 +158,7 @@ public class QuizService : IQuizService
 
         var newBadges = await _Game.CheckAndAwardBadgesAsync(userId);
 
-        // ───── BƯỚC 6: Trả kết quả đầy đủ ─────
+
         return new QuizResultDto
         {
             ProgressId = progress.ProgressId,
@@ -233,7 +224,7 @@ public class QuizService : IQuizService
 
     public async Task<QuizDto> CreateQuizAsync(CreateUpdateQuizDto dto)
     {
-        // ✅ Validate Quiz cho mọi loại (text/image/audio)
+        // Validate Quiz cho mọi loại (text/image/audio)
         ValidateQuiz(dto);
 
         var imageQuizUrl = dto.ImageFile != null
@@ -273,7 +264,7 @@ public class QuizService : IQuizService
 
     public async Task<QuizDto?> UpdateQuizAsync(int quizId, CreateUpdateQuizDto dto)
     {
-        // ✅ Validate Quiz cho mọi loại (text/image/audio)
+        // Validate Quiz cho mọi loại (text/image/audio)
         ValidateQuiz(dto);
 
         var quiz = await _context.Quizzes
@@ -303,6 +294,12 @@ public class QuizService : IQuizService
             }
         }
 
+        //  Xóa lịch sử làm bài liên quan để tránh lỗi FK
+        var oldAttempts = await _context.QuizAttemptDetails
+            .Where(d => d.QuizId == quizId)
+            .ToListAsync();
+        _context.QuizAttemptDetails.RemoveRange(oldAttempts);
+
         _context.Answers.RemoveRange(quiz.Answers);
 
         var newAnswers = new List<Answer>();
@@ -329,31 +326,158 @@ public class QuizService : IQuizService
 
     public async Task<bool> DeleteQuizAsync(int quizId)
     {
-        var quiz = await _context.Quizzes.FindAsync(quizId);
+        // Include Answers để xóa ảnh Cloudinary + xử lý FK
+        var quiz = await _context.Quizzes
+            .Include(q => q.Answers)
+            .FirstOrDefaultAsync(q => q.QuizId == quizId);
 
         if (quiz == null) return false;
+
+        //Xóa lịch sử làm bài liên quan trước
+        var oldAttempts = await _context.QuizAttemptDetails
+            .Where(d => d.QuizId == quizId)
+            .ToListAsync();
+        _context.QuizAttemptDetails.RemoveRange(oldAttempts);
+
+        // Xóa ảnh Quiz trên Cloudinary
         if (!string.IsNullOrEmpty(quiz.ImageUrl))
         {
             await _cloudinaryService.DeleteImageAsync(quiz.ImageUrl);
         }
+
+        // Xóa luôn ảnh các đáp án trên Cloudinary
+        foreach (var ans in quiz.Answers)
+        {
+            if (!string.IsNullOrEmpty(ans.ImageUrl))
+            {
+                await _cloudinaryService.DeleteImageAsync(ans.ImageUrl);
+            }
+        }
+
         _context.Quizzes.Remove(quiz);
         await _context.SaveChangesAsync();
         return true;
     }
 
-    // ═══════════════════════════════════════════════
-    // HELPER METHODS
-    // ═══════════════════════════════════════════════
+    public async Task<List<QuizDto>> GetMidReviewAsync(int gradeId, int reviewNumber)
+    {
+        int startUnit = (reviewNumber - 1) * 4 + 1;
+        int endUnit = startUnit + 3;
 
-    /// <summary>
-    /// ✨ Validate Quiz cho tất cả 4 dạng:
-    /// - Text: QuestionText + Answers text
-    /// - Image: QuestionText/ImageFile + Answers ảnh
-    /// - Audio: TtsText + Answers text/ảnh
-    /// </summary>
+        var quizzes = await _context.Quizzes
+            .Include(q => q.Answers)
+            .Include(q => q.Unit)
+            .Where(q =>
+                q.Unit.GradeId == gradeId &&
+                q.Unit.OrderIndex >= startUnit &&
+                q.Unit.OrderIndex <= endUnit)
+            .OrderBy(q => Guid.NewGuid())
+            .Take(10)
+            .ToListAsync();
+
+        return quizzes.Select(MapToQuizDto).ToList();
+    }
+
+    public async Task<List<QuizDto>> GetFinalReviewAsync(int gradeId)
+    {
+        var quizzes = await _context.Quizzes
+            .Include(q => q.Answers)
+            .Include(q => q.Unit)
+            .Where(q => q.Unit.GradeId == gradeId)
+            .OrderBy(q => Guid.NewGuid())
+            .Take(20)
+            .ToListAsync();
+
+        return quizzes.Select(MapToQuizDto).ToList();
+    }
+
+    public async Task<QuizResultDto> SubmitReviewAsync(int userId, Dictionary<int, int> answers)
+    {
+        if (answers == null || !answers.Any())
+            throw new InvalidOperationException("Không có câu trả lời");
+
+        // Lấy quizzes từ DB qua quizIds 
+        var quizIds = answers.Keys.ToList();
+        var quizzes = await _context.Quizzes
+            .Where(q => quizIds.Contains(q.QuizId))
+            .Include(q => q.Answers)
+            .ToListAsync();
+
+        if (!quizzes.Any())
+            throw new KeyNotFoundException("Không tìm thấy câu hỏi cho bài Review!");
+
+        // Chấm điểm
+        var details = new List<QuizAnswerDetailDto>();
+        int correctCount = 0;
+
+        foreach (var quiz in quizzes)
+        {
+            var correctAnswer = quiz.Answers.FirstOrDefault(a => a.IsCorrect);
+            if (correctAnswer == null) continue;
+
+            bool hasSelected = answers.TryGetValue(quiz.QuizId, out int selectedAnswerId);
+            bool isValidAnswer = hasSelected && quiz.Answers.Any(a => a.AnswerId == selectedAnswerId);
+            int? finalAnswerId = isValidAnswer ? selectedAnswerId : (int?)null;
+            bool isCorrect = isValidAnswer && selectedAnswerId == correctAnswer.AnswerId;
+
+            if (isCorrect) correctCount++;
+
+            details.Add(new QuizAnswerDetailDto
+            {
+                QuizId = quiz.QuizId,
+                QuestionText = quiz.QuestionText ?? "",
+                SelectedAnswerId = finalAnswerId,
+                CorrectAnswerId = correctAnswer.AnswerId,
+                IsCorrect = isCorrect
+            });
+        }
+
+        decimal score = quizzes.Count > 0
+            ? Math.Round((decimal)correctCount / quizzes.Count * 100, 2)
+            : 0;
+
+        int stars = CalculateStars(score);
+        string message = GetMotivationalMessage(score);
+
+        // 
+        var streakResult = await _Game.UpdateStreakAsync(userId);
+
+        int xpToAdd = CalculateXP(correctCount, stars);
+        var xpResult = await _Game.AddXPAsync(userId, xpToAdd);
+
+        var newBadges = await _Game.CheckAndAwardBadgesAsync(userId);
+
+        return new QuizResultDto
+        {
+            ProgressId = 0,  
+            TotalQuestions = quizzes.Count,
+            CorrectAnswers = correctCount,
+            WrongAnswers = quizzes.Count - correctCount,
+            Score = score,
+            StarCount = stars,
+            MotivationalMessage = message,
+
+            XPGained = xpResult.XPGained,
+            TotalXP = xpResult.TotalXP,
+            Level = xpResult.Level,
+            LeveledUp = xpResult.LeveledUp,
+            LevelName = xpResult.LevelName,
+            CurrentStreak = streakResult.CurrentStreak,
+            IsStreakMilestone = streakResult.IsMilestone,
+            StreakMessage = streakResult.MilestoneMessage,
+            NewBadges = newBadges,
+
+            Details = details
+        };
+    }
+
+    // HELPER METHODS
+
+
+
     private static void ValidateQuiz(CreateUpdateQuizDto dto)
     {
-        // 1. Câu hỏi phải có ít nhất 1 nội dung (text, image, hoặc TTS)
+        //  Câu hỏi phải có ít nhất 1 nội dung (text, image, hoặc TTS)
         bool hasQuestionContent = !string.IsNullOrWhiteSpace(dto.QuestionText)
                                 || dto.ImageFile != null
                                 || !string.IsNullOrWhiteSpace(dto.TtsText);
@@ -362,14 +486,14 @@ public class QuizService : IQuizService
             throw new InvalidOperationException(
                 "Câu hỏi phải có ít nhất 1 nội dung (chữ, ảnh, hoặc văn bản TTS)!");
 
-        // 2. Phải có đúng 1 đáp án đúng
+        //  Phải có đúng 1 đáp án đúng
         int correctCount = dto.Answers.Count(a => a.IsCorrect);
         if (correctCount == 0)
             throw new InvalidOperationException("Quiz phải có ít nhất 1 đáp án đúng!");
         if (correctCount > 1)
             throw new InvalidOperationException("Quiz chỉ được có 1 đáp án đúng!");
 
-        // 3. Mỗi đáp án phải có nội dung (text HOẶC ảnh)
+        //  Mỗi đáp án phải có nội dung (text HOẶC ảnh)
         for (int i = 0; i < dto.Answers.Count; i++)
         {
             var a = dto.Answers[i];

@@ -20,9 +20,7 @@ public class UnitService : IUnitService
     }
 
     /// <summary>
-    /// Lấy danh sách Unit, có thể filter theo Grade
-    /// ✨ FIX: _context.Unit (sai) → _context.Units (đúng)
-    /// ✨ FIX: u.Units.Count (sai) → u.Vocabularies.Count (đúng)
+    /// Lấy danh sách Unit, có thể filter theo Grade)
     /// </summary>
     public async Task<List<UnitDto>> GetAllUnitAsync(int? gradeId = null)
     {
@@ -43,15 +41,15 @@ public class UnitService : IUnitService
                 Description = u.Description,
                 ImageUrl = u.ImageUrl,
                 OrderIndex = u.OrderIndex ?? 0,
-                VocabCount = u.Vocabularies.Count,  // ✨ FIX
-                QuizCount = u.Quizzes.Count          // ✨ FIX
+                VocabCount = u.Vocabularies.Count,  
+                QuizCount = u.Quizzes.Count          
             })
             .ToListAsync();
     }
 
     /// <summary>
     /// Lấy chi tiết 1 Unit kèm danh sách Vocabulary và Quiz
-    /// ✨ FIX: Trước đây tham chiếu u.Units (vô lý) → giờ map Vocabularies + Quizzes
+    ///  map Vocabularies + Quizzes
     /// </summary>
     public async Task<UnitDetailDto?> GetUnitDetailAsync(int unitId)
     {
